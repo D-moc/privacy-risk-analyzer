@@ -1,0 +1,86 @@
+body {
+  font-family: Arial;
+  width: 320px;
+  padding: 10px;
+  background: #f8f6f2;
+}
+
+/* HEADER */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.power {
+  background: green;
+  color: white;
+  padding: 3px 10px;
+  border-radius: 10px;
+  font-size: 12px;
+}
+
+/* BANNER */
+.banner {
+  background: #fff3cd;
+  padding: 8px;
+  border-radius: 10px;
+  margin-top: 10px;
+  text-align: center;
+}
+
+/* CARD */
+.card {
+  background: white;
+  padding: 12px;
+  border-radius: 12px;
+  margin-top: 10px;
+}
+
+/* RISK */
+.risk {
+  font-size: 26px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.low { color: green; }
+.medium { color: orange; }
+.high { color: red; }
+
+/* BUTTON */
+button {
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 8px;
+}
+
+/* ACCORDION */
+.item button {
+  background: #eee;
+  color: black;
+}
+
+.content {
+  display: none;
+  font-size: 12px;
+  padding: 5px;
+}
+
+/* CHATBOT */
+.chatbot {
+  margin-top: 10px;
+}
+
+.chatbot input {
+  width: 70%;
+  padding: 6px;
+}
+
+.chatbot button {
+  width: 25%;
+}
