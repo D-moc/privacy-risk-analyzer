@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import API from "../services/api";
 import { toast } from "react-toastify";
 import { Upload, Globe } from "lucide-react";
@@ -11,14 +11,16 @@ import { franc } from "franc";
 import * as pdfjsLib from "pdfjs-dist";
 import jsPDF from "jspdf";
 
+import { AppContext } from "../context/AppContext";
+
 function Dashboard() {
   const [input, setInput] = useState("");
   const [fileName, setFileName] = useState("");
   const [language, setLanguage] = useState("en");
-  const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // 🌍 Detect language
+  const { analysisData, setAnalysisData } = useContext(AppContext);
+
   const detectLanguage = (text) => {
     const lang = franc(text || "");
     if (lang === "hin") return "hi";
@@ -26,7 +28,6 @@ function Dashboard() {
     return "en";
   };
 
-  // 🌐 Translate
   const translateTo = async (text, targetLang) => {
     try {
       const res = await fetch(
@@ -43,7 +44,6 @@ function Dashboard() {
     return await translateTo(text, "en");
   };
 
-  // 📄 Extract PDF text
   const extractPDFText = async (file) => {
     const reader = new FileReader();
 
@@ -67,9 +67,8 @@ function Dashboard() {
     });
   };
 
-  // 📥 Download PDF report
   const downloadReport = () => {
-    if (!result) return;
+    if (!analysisData) return;
 
     const doc = new jsPDF();
 
@@ -77,17 +76,10 @@ function Dashboard() {
     doc.text("Privacy Risk Report", 20, 20);
 
     doc.setFontSize(12);
-    doc.text(`Risk Score: ${result.risk_score}`, 20, 40);
+    doc.text(`Risk Score: ${analysisData.risk_score}`, 20, 40);
 
     doc.text("Summary:", 20, 60);
-    doc.text(result.summary, 20, 70, { maxWidth: 170 });
-
-    if (result.dark_patterns?.length > 0) {
-      doc.text("Dark Patterns:", 20, 120);
-      result.dark_patterns.forEach((item, i) => {
-        doc.text(`- ${item}`, 20, 130 + i * 10);
-      });
-    }
+    doc.text(analysisData.summary, 20, 70, { maxWidth: 170 });
 
     doc.save("Privacy_Report.pdf");
   };
@@ -96,31 +88,19 @@ function Dashboard() {
     if (!input) return toast.error("Enter text or upload file");
 
     try {
+      setAnalysisData(null);
       setLoading(true);
 
-      // 🔥 Auto detect language
       const detectedLang = detectLanguage(input);
       setLanguage(detectedLang);
 
-      // 🔥 Convert input → English
       const englishInput = await translateToEnglish(input);
 
-      // 🔥 Backend call
       const res = await API.post("/analyze", {
         text: englishInput,
       });
 
-      let summary = res.data.summary;
-
-      // 🔥 Convert output → user language
-      if (detectedLang !== "en") {
-        summary = await translateTo(summary, detectedLang);
-      }
-
-      setResult({
-        ...res.data,
-        summary,
-      });
+      setAnalysisData(res.data);
 
     } catch {
       toast.error("Analysis failed");
@@ -130,113 +110,99 @@ function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f8f6f2] p-6">
+    <div className="bg-[#f8f6f2] flex justify-center px-4 py-12">
 
-      <h1 className="text-3xl font-bold mb-6">Privacy Risk Analyzer</h1>
+      <div className="w-full max-w-3xl">
 
-      {/* INPUT CARD */}
-      <div className="bg-white p-6 rounded-2xl shadow-md border mb-6">
+        <div className="mb-8 text-center">
+          <h2 className="text-2xl font-semibold text-gray-800">
+            Analyze Privacy Policies
+          </h2>
+          <p className="text-gray-500 text-sm mt-1">
+            Paste or upload a policy to get instant insights
+          </p>
+        </div>
 
-        <div className="flex flex-wrap justify-between items-center gap-4 mb-4">
+        <div className="bg-white p-6 rounded-2xl shadow-lg border mb-6">
 
-          {/* FILE UPLOAD */}
-          <label className="flex items-center gap-2 bg-gray-50 px-4 py-2 rounded-lg border cursor-pointer">
-            <Upload size={16} />
-            Upload File
+          <div className="flex justify-between items-center mb-4">
 
-            <input
-              type="file"
-              accept=".txt,.pdf"
-              hidden
-              onChange={async (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
+            <label className="flex items-center gap-2 bg-gray-100 px-4 py-2 rounded-lg cursor-pointer hover:bg-gray-200 transition">
+              <Upload size={16} />
+              Upload
+              <input
+                type="file"
+                hidden
+                onChange={async (e) => {
+                  const file = e.target.files[0];
+                  if (!file) return;
 
-                setFileName(file.name);
+                  setFileName(file.name);
 
-                if (file.type === "application/pdf") {
-                  const pdfText = await extractPDFText(file);
-                  setInput(pdfText);
-                } else {
-                  const reader = new FileReader();
-                  reader.onload = () => setInput(reader.result);
-                  reader.readAsText(file);
-                }
-              }}
-            />
-          </label>
+                  if (file.type === "application/pdf") {
+                    const pdfText = await extractPDFText(file);
+                    setInput(pdfText);
+                  } else {
+                    const reader = new FileReader();
+                    reader.onload = () => setInput(reader.result);
+                    reader.readAsText(file);
+                  }
+                }}
+              />
+            </label>
 
-          {/* FILE NAME */}
-          {fileName && (
-            <span className="text-xs text-gray-500">{fileName}</span>
-          )}
+            <div className="flex items-center gap-2 bg-gray-100 px-3 py-2 rounded-lg">
+              <Globe size={16} />
+              <span className="text-sm">{language.toUpperCase()}</span>
+            </div>
 
-          {/* LANGUAGE */}
-          <div className="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded-lg border">
-            <Globe size={16} />
-            <span className="text-sm">{language.toUpperCase()}</span>
           </div>
+
+          <textarea
+            placeholder="Paste privacy policy here..."
+            className="w-full border p-4 rounded-xl h-40 focus:ring-2 focus:ring-blue-500 outline-none"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+          />
+
+          <button
+            onClick={handleAnalyze}
+            className="mt-5 w-full bg-blue-600 text-white py-3 rounded-xl hover:bg-blue-700 transition"
+          >
+            {loading ? "Analyzing..." : "Analyze Policy"}
+          </button>
 
         </div>
 
-        <textarea
-          placeholder="Paste policy or URL..."
-          className="w-full border p-4 rounded-xl h-40"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-        />
+        {loading && <Loader />}
 
-        <button
-          onClick={handleAnalyze}
-          className="mt-5 bg-blue-600 text-white px-8 py-3 rounded-xl hover:bg-blue-700"
-        >
-          {loading ? "Analyzing..." : "Analyze Policy"}
-        </button>
+        {analysisData && !loading && (
+          <div className="space-y-6">
+
+            <div className="bg-white p-6 rounded-2xl shadow">
+              <RiskMeter score={analysisData.risk_score} />
+            </div>
+
+            <div className="bg-white p-6 rounded-2xl shadow">
+              <h3 className="font-semibold mb-2">Summary</h3>
+              <p className="text-gray-600">{analysisData.summary}</p>
+
+              <button
+                onClick={downloadReport}
+                className="mt-4 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+              >
+                Download Report 📄
+              </button>
+            </div>
+
+            <div className="bg-white p-6 rounded-2xl shadow">
+              <InsightsGraph data={analysisData.clauses} />
+            </div>
+
+          </div>
+        )}
 
       </div>
-
-      {loading && <Loader />}
-
-      {/* RESULTS */}
-      {result && !loading && (
-        <div className="grid md:grid-cols-2 gap-6">
-
-          <div className="bg-white p-6 rounded-2xl shadow">
-            <RiskMeter score={result.risk_score} />
-          </div>
-
-          <div className="bg-white p-6 rounded-2xl shadow">
-            <h2 className="font-semibold mb-2">Summary</h2>
-            <p className="text-gray-600">{result.summary}</p>
-
-            <button
-              onClick={downloadReport}
-              className="mt-4 bg-green-600 text-white px-4 py-2 rounded"
-            >
-              Download Report 📄
-            </button>
-          </div>
-
-          <div className="bg-white p-6 rounded-2xl shadow col-span-2">
-            <InsightsGraph data={result.clauses} />
-          </div>
-
-          {result.dark_patterns?.length > 0 && (
-            <div className="bg-red-50 p-6 rounded-2xl border col-span-2">
-              <h2 className="text-red-600 font-semibold mb-2">
-                ⚠️ Dark Patterns
-              </h2>
-              <ul>
-                {result.dark_patterns.map((d, i) => (
-                  <li key={i}>• {d}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-        </div>
-      )}
-
     </div>
   );
 }

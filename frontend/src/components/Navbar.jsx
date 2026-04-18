@@ -1,191 +1,145 @@
-import { useContext, useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { AppContext } from "../context/AppContext";
-import { Sun, Moon, Menu, X } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Menu, X } from "lucide-react";
 
 function Navbar() {
-  const { theme, setTheme } = useContext(AppContext);
   const [open, setOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
   const [user, setUser] = useState(null);
+  const [active, setActive] = useState("home");
 
   const navigate = useNavigate();
-  const location = useLocation();
 
-  // 🔥 Scroll effect
+  // LOAD USER
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const email = localStorage.getItem("userEmail");
+    if (token && email) setUser(email);
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.clear();
+    setUser(null);
+    navigate("/login");
+  };
+
+  // SCROLL TO SECTION
+  const scrollTo = (id) => {
+    document.getElementById(id)?.scrollIntoView({
+      behavior: "smooth",
+    });
+  };
+
+  // 🔥 ACTIVE SECTION DETECTION
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 30);
+      const sections = ["home", "about", "team", "contact"];
+
+      let current = "home";
+
+      sections.forEach((id) => {
+        const section = document.getElementById(id);
+        if (section) {
+          const top = section.offsetTop - 120;
+          if (window.scrollY >= top) {
+            current = id;
+          }
+        }
+      });
+
+      setActive(current);
     };
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // 🔥 LOAD USER FROM LOCAL STORAGE
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    const email = localStorage.getItem("userEmail");
-
-    if (token && email) {
-      setUser(email);
-    }
-  }, []);
-
-  // 🔥 LOGOUT
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("userEmail");
-
-    setUser(null);
-    navigate("/login");
-  };
-
-  // 🔥 Active route
-  const isActive = (path) => location.pathname === path;
-
   return (
-    <nav
-      className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-        scrolled
-          ? "bg-white shadow-md border-b"
-          : "bg-white/70 backdrop-blur-md"
-      }`}
-    >
-      <div className="max-w-7xl mx-auto px-6 md:px-12 py-4 flex justify-between items-center">
+    <nav className="fixed top-0 left-0 right-0 w-full z-50 bg-gradient-to-r from-teal-500 via-blue-500 to-cyan-500 shadow-md">
+
+      <div className="w-full px-6 md:px-12 h-[80px] flex justify-between items-center">
 
         {/* LOGO */}
         <div
-          onClick={() => navigate("/")}
-          className="text-xl font-bold cursor-pointer"
+          onClick={() => scrollTo("home")}
+          className="text-2xl font-bold cursor-pointer tracking-tight text-white"
         >
-          🔐 Privacy<span className="text-blue-600">AI</span>
+          Privacy<span className="text-gray-200">AI</span>
         </div>
 
-        {/* DESKTOP MENU */}
-        <div className="hidden md:flex gap-8">
+        {/* MENU */}
+        <div className="hidden md:flex gap-12 items-center">
 
-          <NavItem label="Home" path="/" navigate={navigate} active={isActive("/")} />
-          <NavItem label="About" path="/about" navigate={navigate} active={isActive("/about")} />
-          <NavItem label="Team" path="/team" navigate={navigate} active={isActive("/team")} />
-          <NavItem label="Extension" path="/extension" navigate={navigate} active={isActive("/extension")} />
-          <NavItem label="Contact" path="/contact" navigate={navigate} active={isActive("/contact")} />
+          <NavItem label="Home" id="home" active={active} onClick={scrollTo} />
+          <NavItem label="About" id="about" active={active} onClick={scrollTo} />
+          <NavItem label="Team" id="team" active={active} onClick={scrollTo} />
+          <NavItem label="Contact" id="contact" active={active} onClick={scrollTo} />
 
         </div>
 
-        {/* RIGHT SIDE */}
-        <div className="hidden md:flex items-center gap-3">
-
-          {/* THEME */}
-          <button
-            onClick={() =>
-              setTheme(theme === "dark" ? "light" : "dark")
-            }
-            className="p-2 border rounded hover:bg-gray-100 transition"
-          >
-            {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
-          </button>
+        {/* RIGHT */}
+        <div className="hidden md:flex items-center gap-4">
 
           {!user ? (
             <>
-              {/* LOGIN */}
               <button
                 onClick={() => navigate("/login")}
-                className="px-4 py-1 border rounded hover:bg-gray-100 transition"
+                className="px-4 py-2 rounded-lg border border-white/40 text-white hover:bg-white/20 transition"
               >
                 Login
               </button>
 
-              {/* SIGNUP */}
               <button
                 onClick={() => navigate("/signup")}
-                className="px-4 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition"
+                className="px-5 py-2 rounded-lg bg-white text-blue-600 font-semibold shadow hover:scale-105 transition"
               >
                 Signup
               </button>
             </>
           ) : (
             <>
-              {/* USER EMAIL */}
-              <span className="text-sm font-medium text-gray-700">
+              <span className="text-sm font-medium text-white">
                 {user}
               </span>
 
-              {/* LOGOUT */}
               <button
                 onClick={handleLogout}
-                className="px-4 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition"
+                className="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 transition"
               >
                 Logout
               </button>
             </>
           )}
-
         </div>
 
-        {/* MOBILE BUTTON */}
-        <button onClick={() => setOpen(!open)} className="md:hidden">
+        {/* MOBILE */}
+        <button
+          onClick={() => setOpen(!open)}
+          className="md:hidden text-white"
+        >
           {open ? <X /> : <Menu />}
         </button>
-
       </div>
-
-      {/* MOBILE MENU */}
-      {open && (
-        <div className="md:hidden px-6 pb-4 flex flex-col gap-4 bg-white border-t">
-
-          <MobileItem label="Home" onClick={() => navigate("/")} />
-          <MobileItem label="About" onClick={() => navigate("/about")} />
-          <MobileItem label="Team" onClick={() => navigate("/team")} />
-          <MobileItem label="Extension" onClick={() => navigate("/extension")} />
-          <MobileItem label="Contact" onClick={() => navigate("/contact")} />
-
-          {!user ? (
-            <>
-              <MobileItem label="Login" onClick={() => navigate("/login")} />
-              <MobileItem label="Signup" onClick={() => navigate("/signup")} />
-            </>
-          ) : (
-            <>
-              <span className="text-sm text-gray-600">{user}</span>
-              <MobileItem label="Logout" onClick={handleLogout} />
-            </>
-          )}
-
-        </div>
-      )}
     </nav>
   );
 }
 
-/* NAV ITEM */
-function NavItem({ label, path, navigate, active }) {
+/* 🔥 NAV ITEM */
+function NavItem({ label, id, active, onClick }) {
+  const isActive = active === id;
+
   return (
     <button
-      onClick={() => navigate(path)}
-      className="relative text-sm font-medium"
-    >
-      <span className={active ? "text-blue-600" : "hover:text-blue-600 transition"}>
-        {label}
-      </span>
-
-      <span
-        className={`absolute left-0 -bottom-1 h-[2px] bg-blue-600 transition-all duration-300 ${
-          active ? "w-full" : "w-0 hover:w-full"
-        }`}
-      ></span>
-    </button>
-  );
-}
-
-/* MOBILE ITEM */
-function MobileItem({ label, onClick }) {
-  return (
-    <button
-      onClick={onClick}
-      className="text-left hover:text-blue-600 transition"
+      onClick={() => onClick(id)}
+      className="relative text-lg font-semibold tracking-wide text-white/90 hover:text-white transition"
     >
       {label}
+
+      {/* 🔥 UNDERLINE (FIXED + ACTIVE) */}
+      <span
+        className={`absolute left-0 -bottom-1 h-[3px] w-full bg-white rounded-full origin-left transform transition-transform duration-300 ${
+          isActive ? "scale-x-100" : "scale-x-0"
+        }`}
+      />
     </button>
   );
 }

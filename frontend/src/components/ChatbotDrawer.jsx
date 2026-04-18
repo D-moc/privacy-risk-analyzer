@@ -16,8 +16,7 @@ function ChatbotDrawer() {
   const [messages, setMessages] = useState([
     {
       role: "assistant",
-      content:
-        "👋 Hi! I’m your Privacy AI assistant. Ask me anything about policies.",
+      content: "👋 Hi! Ask me anything about this privacy policy.",
     },
   ]);
   const [loading, setLoading] = useState(false);
@@ -25,7 +24,7 @@ function ChatbotDrawer() {
   const panelRef = useRef();
   const bottomRef = useRef();
 
-  // 🔥 CLOSE ON OUTSIDE CLICK
+  // CLOSE ON OUTSIDE CLICK
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (panelRef.current && !panelRef.current.contains(e.target)) {
@@ -37,12 +36,11 @@ function ChatbotDrawer() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [open]);
 
-  // 🔥 AUTO SCROLL
+  // AUTO SCROLL
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // 🔥 RISK LABEL
   const getRiskLabel = () => {
     if (!analysisData) return null;
 
@@ -76,16 +74,7 @@ function ChatbotDrawer() {
           messages: [
             {
               role: "system",
-              content: `
-You are a Privacy Assistant.
-
-- Explain clearly
-- Give decision: SAFE / MODERATE / RISKY
-- Be short and helpful
-
-Context:
-${contextText}
-`,
+              content: `Explain simply. Give SAFE / MODERATE / RISKY.\n${contextText}`,
             },
             userMsg,
           ],
@@ -100,35 +89,12 @@ ${contextText}
 
       const reply = res.data.choices[0].message.content;
 
-      const botMsg = {
-        role: "assistant",
-        content: reply,
-      };
-
-      setMessages((prev) => [...prev, botMsg]);
-
-      // 🔥 LOGIN SUGGESTION
-      if (!user) {
-        setMessages((prev) => [
-          ...prev,
-          {
-            role: "assistant",
-            content:
-              "🔐 Login to save your chats & get personalized insights.",
-          },
-        ]);
-      }
-
-      // 🔥 THANK YOU MESSAGE
       setMessages((prev) => [
         ...prev,
-        {
-          role: "assistant",
-          content: "✅ Hope that helps! Ask anything else anytime.",
-        },
+        { role: "assistant", content: reply },
       ]);
 
-    } catch (err) {
+    } catch {
       setMessages((prev) => [
         ...prev,
         { role: "assistant", content: "⚠️ AI error. Try again." },
@@ -145,7 +111,7 @@ ${contextText}
       {/* FLOAT BUTTON */}
       <button
         onClick={() => setOpen(true)}
-        className="fixed bottom-6 right-6 bg-blue-600 text-white p-4 rounded-full shadow-xl hover:scale-105 transition z-50"
+        className="fixed bottom-6 right-6 bg-blue-600 text-white p-4 rounded-full shadow-xl hover:scale-110 transition z-50"
       >
         <MessageCircle />
       </button>
@@ -153,15 +119,17 @@ ${contextText}
       {/* PANEL */}
       <div
         ref={panelRef}
-        className={`fixed right-6 top-[80px] h-[85%] w-[360px] bg-white rounded-2xl shadow-2xl border transition-transform duration-300 z-50 ${
-          open ? "translate-x-0" : "translate-x-[120%]"
+        className={`fixed right-6 top-[80px] h-[85%] w-[380px] bg-white rounded-3xl shadow-2xl border transition-all duration-300 z-50 ${
+          open ? "translate-x-0 opacity-100" : "translate-x-[120%] opacity-0"
         }`}
       >
 
         {/* HEADER */}
-        <div className="p-4 border-b flex justify-between items-center">
+        <div className="p-4 border-b flex justify-between items-center bg-gray-50 rounded-t-3xl">
           <div>
-            <h3 className="font-semibold text-lg">Privacy AI</h3>
+            <h3 className="font-semibold text-lg text-gray-800">
+              Privacy Assistant
+            </h3>
 
             {risk && (
               <span className={`text-white text-xs px-2 py-1 rounded ${risk.color}`}>
@@ -171,37 +139,20 @@ ${contextText}
           </div>
 
           <button onClick={() => setOpen(false)}>
-            <X />
+            <X className="text-gray-500 hover:text-black" />
           </button>
         </div>
 
-        {/* QUICK PROMPTS */}
-        <div className="p-3 flex gap-2 flex-wrap border-b">
-          {[
-            "Is this safe?",
-            "What data is collected?",
-            "Should I accept?",
-          ].map((q, i) => (
-            <button
-              key={i}
-              onClick={() => setInput(q)}
-              className="text-xs bg-gray-100 px-3 py-1 rounded-full hover:bg-gray-200"
-            >
-              {q}
-            </button>
-          ))}
-        </div>
-
-        {/* CHAT */}
-        <div className="flex-1 p-3 overflow-y-auto flex flex-col gap-3 text-sm">
+        {/* CHAT AREA */}
+        <div className="flex-1 p-4 overflow-y-auto flex flex-col gap-3 text-sm">
 
           {messages.map((msg, i) => (
             <div
               key={i}
-              className={`px-3 py-2 rounded-xl max-w-[75%] ${
+              className={`px-4 py-2 rounded-2xl max-w-[75%] ${
                 msg.role === "user"
-                  ? "bg-blue-500 text-white self-end"
-                  : "bg-gray-100 self-start"
+                  ? "bg-blue-600 text-white self-end"
+                  : "bg-gray-100 text-gray-800 self-start"
               }`}
             >
               {msg.content}
@@ -209,7 +160,7 @@ ${contextText}
           ))}
 
           {loading && (
-            <div className="bg-gray-100 px-3 py-2 rounded-xl animate-pulse w-fit">
+            <div className="bg-gray-100 px-4 py-2 rounded-2xl animate-pulse w-fit">
               Typing...
             </div>
           )}
@@ -222,13 +173,13 @@ ${contextText}
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask about privacy..."
-            className="flex-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Ask something..."
+            className="flex-1 border rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             onKeyDown={(e) => e.key === "Enter" && sendMessage()}
           />
           <button
             onClick={sendMessage}
-            className="bg-blue-600 text-white px-4 rounded-lg hover:bg-blue-700"
+            className="bg-blue-600 text-white px-4 rounded-xl hover:bg-blue-700"
           >
             Send
           </button>
@@ -236,7 +187,7 @@ ${contextText}
 
         {/* LOGIN CTA */}
         {!user && (
-          <div className="p-3 border-t flex justify-between text-xs">
+          <div className="p-3 border-t flex justify-between text-sm">
             <button
               onClick={() => navigate("/login")}
               className="text-blue-600 hover:underline"

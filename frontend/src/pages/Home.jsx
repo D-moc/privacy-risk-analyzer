@@ -5,8 +5,10 @@ function Home() {
   const navigate = useNavigate();
 
   return (
-    <div className="bg-[#f8f6f2] min-h-screen text-gray-800 flex items-center justify-center px-6">
-
+    <section
+      id="home"
+      className="bg-[#f8f6f2] min-h-screen flex items-center justify-center px-6"
+    >
       <div className="text-center max-w-4xl">
 
         {/* MAIN HEADING */}
@@ -40,28 +42,23 @@ function Home() {
           understandable insights so you can make informed decisions.
         </motion.p>
 
-        {/* BUTTONS */}
+        {/* CTA BUTTON */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.6 }}
-          className="mt-10 flex justify-center gap-4 flex-wrap"
+          className="mt-10 flex justify-center"
         >
           <button
             onClick={() => navigate("/dashboard")}
-            className="bg-blue-600 text-white px-6 py-3 rounded-lg shadow-md hover:bg-blue-700 transition"
+            className="bg-blue-600 text-white px-8 py-3 rounded-xl shadow-md hover:bg-blue-700 transition text-lg font-medium"
           >
-            Get Started 🚀
-          </button>
-
-          <button className="border border-gray-400 px-6 py-3 rounded-lg hover:bg-gray-100 transition">
-            Try Demo
+            Get Started
           </button>
         </motion.div>
 
       </div>
-
-    </div>
+    </section>
   );
 }
 

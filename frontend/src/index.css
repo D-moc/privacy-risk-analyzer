@@ -1,17 +1,23 @@
 @import "tailwindcss";
 
-/* RESET + BASE */
+* {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
 html,
 body {
   margin: 0;
   padding: 0;
   scroll-behavior: smooth;
   font-family: "Inter", "Georgia", serif;
-  background-color: #f8f6f2;
-  color: #1f2937;
+  overflow-x: hidden;
 }
 
-/* ================= NAVBAR HOVER ================= */
+
+html {
+  background-color: #f8f6f2; 
+}
+
 .nav-link {
   position: relative;
   transition: color 0.3s ease;
@@ -36,12 +42,10 @@ body {
   width: 100%;
 }
 
-/* ================= BUTTON TRANSITIONS ================= */
 button {
   transition: all 0.25s ease;
 }
 
-/* ================= SMOOTH FADE ANIMATION ================= */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -57,13 +61,12 @@ button {
   animation: fadeIn 0.3s ease;
 }
 
-/* ================= SECTION SPACING FIX ================= */
-/* Prevent navbar overlap when scrolling */
+/* section */
 section {
-  scroll-margin-top: 90px;
+  scroll-margin-top: 80px; 
 }
 
-/* ================= INPUT + TEXTAREA ================= */
+/* input */
 input,
 textarea,
 select {
@@ -77,13 +80,13 @@ select:focus {
   border-color: #2563eb;
 }
 
-/* ================= SCROLLBAR (OPTIONAL CLEAN UI) ================= */
+/* Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f3f4f6;
+  background: #f8f6f2; 
 }
 
 ::-webkit-scrollbar-thumb {
