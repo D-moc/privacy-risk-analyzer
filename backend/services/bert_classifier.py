@@ -1,6 +1,5 @@
 from transformers import pipeline
 
-# 🔥 EXPLICIT MODEL (removes warning + stable)
 classifier = pipeline(
     "sentiment-analysis",
     model="distilbert-base-uncased-finetuned-sst-2-english",
@@ -13,14 +12,14 @@ def classify_clauses(text):
     """
 
     try:
-        # 🔥 SAFETY CHECK
+        # SAFETY CHECK
         if not text:
             return []
 
-        # 🔥 LIMIT INPUT (VERY IMPORTANT)
+        # LIMIT INPUT
         text = text[:512]
 
-        # 🔥 RUN MODEL
+        # RUN MODEL
         results = classifier(text)
 
         return results

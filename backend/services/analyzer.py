@@ -20,19 +20,19 @@ def analyze_policy(text):
         "retention": []
     }
 
-    # 🔍 DATA COLLECTION
+    # DATA COLLECTION
     if any(word in text_lower for word in ["collect", "gather", "personal data", "information"]):
         clauses["data_collection"].append("Collects user data")
 
-    # 🔍 DATA SHARING
+    # DATA SHARING
     if any(word in text_lower for word in ["share", "third party", "partners", "advertisers"]):
         clauses["data_sharing"].append("Shares data with third parties")
 
-    # 🔍 COOKIES / TRACKING
+    # COOKIES / TRACKING
     if any(word in text_lower for word in ["cookie", "tracking", "browser data"]):
         clauses["cookies"].append("Uses cookies / tracking")
 
-    # 🔍 DATA RETENTION
+    # DATA RETENTION
     if any(word in text_lower for word in ["retain", "store", "save data", "keep data"]):
         clauses["retention"].append("Stores user data")
 

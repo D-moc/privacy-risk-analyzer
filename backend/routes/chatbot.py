@@ -3,7 +3,7 @@ from transformers import pipeline
 
 router = APIRouter()
 
-# ✅ FIXED PIPELINE
+# FIXED PIPELINE
 qa_pipeline = pipeline(
     "question-answering",
     model="distilbert-base-cased-distilled-squad"

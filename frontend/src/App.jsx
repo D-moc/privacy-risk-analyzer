@@ -1,7 +1,6 @@
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 
 import Navbar from "./components/Navbar";
 import ChatbotDrawer from "./components/ChatbotDrawer";
@@ -15,15 +14,7 @@ import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
 import Footer from "./components/Footer";
 
-function Divider() {
-  return (
-    <div className="w-full flex justify-center py-6">
-      <div className="h-[4px] w-2/3 rounded-full bg-gradient-to-r from-teal-400 via-blue-500 to-cyan-400 opacity-80"></div>
-    </div>
-  );
-}
-
-function AppWrapper() {
+function App() {
   const location = useLocation();
 
   return (
@@ -36,12 +27,7 @@ function AppWrapper() {
       <div className="pt-[80px]">
 
         {/* TOAST */}
-        <ToastContainer
-          position="top-right"
-          autoClose={3000}
-          pauseOnHover
-          theme="light"
-        />
+        <ToastContainer />
 
         <AnimatePresence mode="wait">
           <Routes location={location} key={location.pathname}>
@@ -51,33 +37,15 @@ function AppWrapper() {
               path="/"
               element={
                 <>
-                  <section id="home">
-                    <Home />
-                  </section>
-
-                  <Divider />
-
-                  <section id="about">
-                    <About />
-                  </section>
-
-                  <Divider />
-
-                  <section id="team">
-                    <Team />
-                  </section>
-
-                  <Divider />
-
-                  <section id="contact">
-                    <Contact />
-                  </section>
+                  <section id="home"><Home /></section>
+                  <section id="about"><About /></section>
+                  <section id="team"><Team /></section>
+                  <section id="contact"><Contact /></section>
                   <Footer />
                 </>
               }
             />
 
-            {/* OTHER ROUTES */}
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/dashboard" element={<Dashboard />} />
@@ -91,14 +59,6 @@ function AppWrapper() {
       <ChatbotDrawer />
 
     </div>
-  );
-}
-
-function App() {
-  return (
-    <BrowserRouter>
-      <AppWrapper />
-    </BrowserRouter>
   );
 }
 

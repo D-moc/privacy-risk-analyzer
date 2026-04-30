@@ -15,38 +15,38 @@ router = APIRouter()
 @router.post("/analyze")
 def analyze(data: dict):
 
-    # 🔥 INPUT
+    # INPUT
     input_data = data.get("input") or data.get("text")
     preference = data.get("preference", "moderate")
 
     if not input_data:
         return {"error": "No input provided"}
 
-    # 🔥 FETCH + CLEAN
+    # FETCH + CLEAN
     raw_text = fetch_policy(input_data)
     clean = clean_text(raw_text)
 
-    # 🔥 LIMIT TEXT (IMPORTANT)
+    # LIMIT TEXT (IMPORTANT)
     clean = clean[:2000]
 
-    # 🔥 CLAUSE ANALYSIS
+    # CLAUSE ANALYSIS
     clauses = analyze_policy(clean)
 
-    # 🔥 SAFE BERT
+    # SAFE BERT
     try:
         bert_labels = classify_clauses(clean)
     except Exception as e:
         print("BERT Error:", e)
         bert_labels = []
 
-    # 🔥 DARK PATTERNS
+    # DARK PATTERNS
     dark_patterns = detect_dark_patterns(clean)
 
-    # 🔥 RISK
+    # RISK
     risk = calculate_risk(clauses, bert_labels, dark_patterns)
     final_risk = adjust_risk(risk, preference)
 
-    # 🔥 SUMMARY
+    # SUMMARY
     summary = summarize_text(clean)
 
     return {

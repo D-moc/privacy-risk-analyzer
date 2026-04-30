@@ -3,11 +3,10 @@ from database.db import users_collection
 from models.user_model import UserSignup, UserLogin
 from utils.auth_utils import hash_password, verify_password, create_token
 
-# 🔥 THIS IS MISSING IN YOUR CODE
 router = APIRouter(prefix="/auth")
 
 
-# 🔥 SIGNUP
+# SIGNUP
 @router.post("/signup")
 async def signup(user: UserSignup):
     existing = await users_collection.find_one({"email": user.email})
@@ -25,7 +24,7 @@ async def signup(user: UserSignup):
     return {"msg": "User created successfully"}
 
 
-# 🔥 LOGIN
+# LOGIN
 @router.post("/login")
 async def login(user: UserLogin):
     db_user = await users_collection.find_one({"email": user.email})
