@@ -1,3 +1,5 @@
+import { useContext } from "react";
+import { AuthContext } from "../context/AuthContext";
 import { useState, useRef, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
@@ -16,6 +18,8 @@ import {
 function Sidebar() {
   const navigate = useNavigate();
   const location = useLocation();
+
+  const { logout } = useContext(AuthContext);
 
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -96,8 +100,14 @@ function Sidebar() {
   ];
 
   const handleLogout = () => {
-    localStorage.clear();
-    navigate("/login");
+    logout();
+
+    localStorage.removeItem("userEmail");
+    localStorage.removeItem("userName");
+
+    navigate("/login", {
+      replace: true,
+    });
   };
 
   return (
@@ -111,7 +121,7 @@ function Sidebar() {
         fixed
         top-5
         left-5
-        z-[60]
+        z-60
         p-3
         rounded-xl
         bg-white
@@ -159,7 +169,7 @@ function Sidebar() {
       >
         {/* Logo */}
 
-        <div className="h-[80px] px-5 flex items-center border-b border-slate-100">
+        <div className="h-20 px-5 flex items-center border-b border-slate-100">
           <div
             onClick={() => {
               navigate("/home");
@@ -172,7 +182,7 @@ function Sidebar() {
               w-12
               h-12
               rounded-2xl
-              bg-gradient-to-br
+              bg-linear-to-br
               from-cyan-500
               to-blue-600
               flex
@@ -255,12 +265,12 @@ function Sidebar() {
                   onClick={() => navigate(item.path)}
                   className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 text-sm font-medium ${
                     active
-                      ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-md shadow-cyan-500/20"
+                      ? "bg-linear-to-r from-cyan-500 to-blue-600 text-white shadow-md shadow-cyan-500/20"
                       : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                   }`}
                 >
                   <div
-                    className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                    className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
                       active ? "bg-white/20" : "bg-slate-100"
                     }`}
                   >
@@ -280,14 +290,14 @@ function Sidebar() {
         {/* Bottom Profile Section */}
         <div
           ref={profileRef}
-          className="flex-shrink-0 px-3 py-4 border-t border-slate-100 space-y-2"
+          className="shrink-0 px-3 py-4 border-t border-slate-100 space-y-2"
         >
           {/* Profile Card */}
           <button
             onClick={() => setShowProfileMenu(!showProfileMenu)}
             className="w-full flex items-center gap-3 px-3 py-3 rounded-xl bg-slate-50 border border-slate-100 hover:bg-slate-100 transition-all text-left"
           >
-            <div className="w-10 h-10 rounded-full overflow-hidden border border-slate-200 flex-shrink-0">
+            <div className="w-10 h-10 rounded-full overflow-hidden border border-slate-200 shrink-0">
               {profileImage ? (
                 <img
                   src={profileImage}
@@ -295,7 +305,7 @@ function Sidebar() {
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="w-full h-full bg-gradient-to-br from-cyan-500 to-blue-600 text-white flex items-center justify-center font-semibold text-sm">
+                <div className="w-full h-full bg-linear-to-br from-cyan-500 to-blue-600 text-white flex items-center justify-center font-semibold text-sm">
                   {userName.charAt(0).toUpperCase()}
                 </div>
               )}
@@ -334,7 +344,7 @@ function Sidebar() {
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold text-xl">
+                    <div className="w-full h-full bg-linear-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold text-xl">
                       {userEmail.charAt(0).toUpperCase()}
                     </div>
                   )}
@@ -344,7 +354,7 @@ function Sidebar() {
                   {userEmail}
                 </p>
 
-                <label className="mt-4 cursor-pointer px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-sm font-medium hover:opacity-90 transition">
+                <label className="mt-4 cursor-pointer px-4 py-2 rounded-xl bg-linear-to-r from-cyan-500 to-blue-600 text-white text-sm font-medium hover:opacity-90 transition">
                   Upload Photo
                   <input
                     type="file"
