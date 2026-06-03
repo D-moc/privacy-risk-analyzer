@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { createUserWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "../firebase";
@@ -10,13 +10,21 @@ import { toast } from "react-toastify";
 
 function Signup() {
   const navigate = useNavigate();
-  const { login } = useContext(AuthContext);
+  const { login, user } = useContext(AuthContext);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      navigate("/home", {
+        replace: true,
+      });
+    }
+  }, [user, navigate]);
 
   const exchangeFirebaseToken = async (firebaseToken) => {
     const res = await API.post("/auth/firebase", { token: firebaseToken });
@@ -26,8 +34,15 @@ function Signup() {
       name: res.data.name,
       picture: res.data.picture,
     };
+    localStorage.setItem("userEmail", res.data.email);
+
+    localStorage.setItem("userName", res.data.name || "User");
+
     login(userData);
-    navigate("/home");
+
+    navigate("/home", {
+      replace: true,
+    });
   };
 
   const getStrength = () => {
@@ -103,7 +118,7 @@ function Signup() {
       const result = await signInWithPopup(auth, googleProvider);
       const firebaseToken = await result.user.getIdToken();
       await exchangeFirebaseToken(firebaseToken);
-      toast.success("Google Signup Successful 🎉");
+      toast.success("Signup Successful!");
     } catch (error) {
       console.error(error);
       toast.error(error.message || "Google Signup Failed");
@@ -116,9 +131,9 @@ function Signup() {
     <div className="min-h-screen bg-white flex items-center justify-center relative overflow-hidden p-6">
       {/* Background */}
       <div className="absolute inset-0">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#e5e7eb_1px,transparent_1px),linear-gradient(to_bottom,#e5e7eb_1px,transparent_1px)] bg-[size:80px_80px]" />
-        <div className="absolute -left-40 top-0 h-full w-[500px] bg-cyan-300/25 blur-[140px]" />
-        <div className="absolute -right-40 bottom-0 h-full w-[500px] bg-blue-300/25 blur-[140px]" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#e5e7eb_1px,transparent_1px),linear-gradient(to_bottom,#e5e7eb_1px,transparent_1px)] bg-size-[80px_80px]" />
+        <div className="absolute -left-40 top-0 h-full w-125 bg-cyan-300/25 blur-[140px]" />
+        <div className="absolute -right-40 bottom-0 h-full w-125 bg-blue-300/25 blur-[140px]" />
       </div>
 
       {/* Top-left branding */}
@@ -127,8 +142,7 @@ function Signup() {
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.5 }}
         className="absolute top-8 left-10 z-10"
-      >
-      </motion.div>
+      ></motion.div>
 
       {/* Card */}
       <motion.div
@@ -185,7 +199,7 @@ function Signup() {
           <div className="relative mt-1.5">
             <Mail
               size={15}
-              className="absolute left-3.5 top-[13px] text-slate-400"
+              className="absolute left-3.5 top-3.25 text-slate-400"
             />
             <input
               type="email"
@@ -205,7 +219,7 @@ function Signup() {
           <div className="relative mt-1.5">
             <Lock
               size={15}
-              className="absolute left-3.5 top-[13px] text-slate-400"
+              className="absolute left-3.5 top-3.25 text-slate-400"
             />
             <input
               type={showPassword ? "text" : "password"}
@@ -217,7 +231,7 @@ function Signup() {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3.5 top-[13px] text-slate-400 hover:text-slate-600"
+              className="absolute right-3.5 top-3.25 text-slate-400 hover:text-slate-600"
             >
               {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
             </button>
@@ -264,7 +278,7 @@ function Signup() {
         <button
           onClick={handleSignup}
           disabled={loading}
-          className="w-full h-11 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold text-sm shadow-lg shadow-cyan-500/25 hover:scale-[1.01] transition disabled:opacity-60"
+          className="w-full h-11 rounded-xl bg-linear-to-r from-cyan-500 to-blue-600 text-white font-semibold text-sm shadow-lg shadow-cyan-500/25 hover:scale-[1.01] transition disabled:opacity-60"
         >
           {loading ? "Creating Account..." : "Create Account"}
         </button>
