@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { signInWithPopup, signInWithEmailAndPassword } from "firebase/auth";
@@ -10,23 +11,43 @@ import { toast } from "react-toastify";
 
 function Login() {
   const navigate = useNavigate();
-  const { login } = useContext(AuthContext);
+  const { login, user } = useContext(AuthContext);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+  if (user) {
+    navigate("/home", {
+      replace: true,
+    });
+  }
+}, [user, navigate]);
+
   const exchangeFirebaseToken = async (firebaseToken) => {
-    const res = await API.post("/auth/firebase", { token: firebaseToken });
+    const res = await API.post("/auth/firebase", {
+      token: firebaseToken,
+    });
+
     const userData = {
       uid: res.data.uid,
       email: res.data.email,
       name: res.data.name,
       picture: res.data.picture,
     };
+
+    // ADD THESE 2 LINES
+    localStorage.setItem("userEmail", res.data.email);
+
+    localStorage.setItem("userName", res.data.name || "User");
+
     login(userData);
-    navigate("/home");
+
+    navigate("/home", {
+      replace: true,
+    });
   };
 
   const handleEmailLogin = async () => {
@@ -81,7 +102,7 @@ function Login() {
       toast.success("Google Login Successful");
     } catch (error) {
       console.error(error);
-      toast.error(error.message || "Google Login Failed");
+      toast.error(error.message || "Login Failed");
     } finally {
       setLoading(false);
     }
@@ -91,9 +112,9 @@ function Login() {
     <div className="min-h-screen bg-white flex items-center justify-center relative overflow-hidden p-6">
       {/* Background */}
       <div className="absolute inset-0">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#e5e7eb_1px,transparent_1px),linear-gradient(to_bottom,#e5e7eb_1px,transparent_1px)] bg-[size:80px_80px]" />
-        <div className="absolute -left-40 top-0 h-full w-[500px] bg-cyan-300/25 blur-[140px]" />
-        <div className="absolute -right-40 bottom-0 h-full w-[500px] bg-blue-300/25 blur-[140px]" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#e5e7eb_1px,transparent_1px),linear-gradient(to_bottom,#e5e7eb_1px,transparent_1px)] bg-size-[80px_80px]" />
+        <div className="absolute -left-40 top-0 h-full w-125 bg-cyan-300/25 blur-[140px]" />
+        <div className="absolute -right-40 bottom-0 h-full w-125 bg-blue-300/25 blur-[140px]" />
       </div>
 
       {/* Top-left branding */}
@@ -157,7 +178,7 @@ function Login() {
           <div className="relative mt-1.5">
             <Mail
               size={15}
-              className="absolute left-3.5 top-[13px] text-slate-400"
+              className="absolute left-3.5 top-3.25 text-slate-400"
             />
             <input
               type="email"
@@ -177,7 +198,7 @@ function Login() {
           <div className="relative mt-1.5">
             <Lock
               size={15}
-              className="absolute left-3.5 top-[13px] text-slate-400"
+              className="absolute left-3.5 top-3.25 text-slate-400"
             />
             <input
               type={showPassword ? "text" : "password"}
@@ -189,7 +210,7 @@ function Login() {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3.5 top-[13px] text-slate-400 hover:text-slate-600"
+              className="absolute right-3.5 top-3.25 text-slate-400 hover:text-slate-600"
             >
               {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
             </button>
@@ -210,7 +231,7 @@ function Login() {
         <button
           onClick={handleEmailLogin}
           disabled={loading}
-          className="w-full h-11 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold text-sm shadow-lg shadow-cyan-500/25 hover:scale-[1.01] transition disabled:opacity-60"
+          className="w-full h-11 rounded-xl bg-linear-to-r from-cyan-500 to-blue-600 text-white font-semibold text-sm shadow-lg shadow-cyan-500/25 hover:scale-[1.01] transition disabled:opacity-60"
         >
           {loading ? "Signing In..." : "Sign In"}
         </button>
