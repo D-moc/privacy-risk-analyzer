@@ -1,146 +1,177 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { Menu, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Search, Globe, Moon, Sun } from "lucide-react";
+
+import GoogleTranslate from "./GoogleTranslate";
 
 function Navbar() {
-  const [open, setOpen] = useState(false);
-  const [user, setUser] = useState(null);
-  const [active, setActive] = useState("home");
+  const [theme, setTheme] = useState(localStorage.getItem("theme") || "light");
 
-  const navigate = useNavigate();
-
-  // LOAD USER
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    const email = localStorage.getItem("userEmail");
-    if (token && email) setUser(email);
-  }, []);
-
-  const handleLogout = () => {
-    localStorage.clear();
-    setUser(null);
-    navigate("/login");
-  };
-
-  // SCROLL TO SECTION
-  const scrollTo = (id) => {
-    document.getElementById(id)?.scrollIntoView({
-      behavior: "smooth",
-    });
-  };
-
-  // 🔥 ACTIVE SECTION DETECTION
-  useEffect(() => {
-    const handleScroll = () => {
-      const sections = ["home", "about", "team", "contact"];
-
-      let current = "home";
-
-      sections.forEach((id) => {
-        const section = document.getElementById(id);
-        if (section) {
-          const top = section.offsetTop - 120;
-          if (window.scrollY >= top) {
-            current = id;
-          }
-        }
-      });
-
-      setActive(current);
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  return (
-    <nav className="fixed top-0 left-0 right-0 w-full z-50 bg-gradient-to-r from-teal-500 via-blue-500 to-cyan-500 shadow-md">
-
-      <div className="w-full px-6 md:px-12 h-[80px] flex justify-between items-center">
-
-        {/* LOGO */}
-        <div
-          onClick={() => scrollTo("home")}
-          className="text-2xl font-bold cursor-pointer tracking-tight text-white"
-        >
-          Privacy<span className="text-gray-200">AI</span>
-        </div>
-
-        {/* MENU */}
-        <div className="hidden md:flex gap-12 items-center">
-
-          <NavItem label="Home" id="home" active={active} onClick={scrollTo} />
-          <NavItem label="About" id="about" active={active} onClick={scrollTo} />
-          <NavItem label="Team" id="team" active={active} onClick={scrollTo} />
-          <NavItem label="Contact" id="contact" active={active} onClick={scrollTo} />
-
-        </div>
-
-        {/* RIGHT */}
-        <div className="hidden md:flex items-center gap-4">
-
-          {!user ? (
-            <>
-              <button
-                onClick={() => navigate("/login")}
-                className="px-4 py-2 rounded-lg border border-white/40 text-white hover:bg-white/20 transition"
-              >
-                Login
-              </button>
-
-              <button
-                onClick={() => navigate("/signup")}
-                className="px-5 py-2 rounded-lg bg-white text-blue-600 font-semibold shadow hover:scale-105 transition"
-              >
-                Signup
-              </button>
-            </>
-          ) : (
-            <>
-              <span className="text-sm font-medium text-white">
-                {user}
-              </span>
-
-              <button
-                onClick={handleLogout}
-                className="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 transition"
-              >
-                Logout
-              </button>
-            </>
-          )}
-        </div>
-
-        {/* MOBILE */}
-        <button
-          onClick={() => setOpen(!open)}
-          className="md:hidden text-white"
-        >
-          {open ? <X /> : <Menu />}
-        </button>
-      </div>
-    </nav>
+  const [language, setLanguage] = useState(
+    localStorage.getItem("language") || "en",
   );
-}
 
-/* 🔥 NAV ITEM */
-function NavItem({ label, id, active, onClick }) {
-  const isActive = active === id;
+  useEffect(() => {
+    if (theme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+
+    localStorage.setItem("theme", theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === "light" ? "dark" : "light"));
+  };
+
+  const handleLanguageChange = (e) => {
+    const lang = e.target.value;
+
+    setLanguage(lang);
+
+    localStorage.setItem("language", lang);
+
+    const combo = document.querySelector(".goog-te-combo");
+
+    if (combo) {
+      combo.value = lang;
+      combo.dispatchEvent(new Event("change"));
+    }
+  };
 
   return (
-    <button
-      onClick={() => onClick(id)}
-      className="relative text-lg font-semibold tracking-wide text-white/90 hover:text-white transition"
-    >
-      {label}
+    <>
+      {/* Hidden Google Translate */}
+      <div className="hidden">
+        <GoogleTranslate />
+      </div>
 
-      {/* 🔥 UNDERLINE (FIXED + ACTIVE) */}
-      <span
-        className={`absolute left-0 -bottom-1 h-[3px] w-full bg-white rounded-full origin-left transform transition-transform duration-300 ${
-          isActive ? "scale-x-100" : "scale-x-0"
-        }`}
-      />
-    </button>
+      <header
+        className="
+          fixed
+          top-0
+          left-0
+          lg:left-72
+          right-0
+          h-20
+          bg-white/80
+          backdrop-blur-xl
+          border-b
+          border-slate-200
+          px-4 md:px-6 lg:px-8
+          flex
+          items-center
+          justify-between
+          z-40
+          shadow-sm
+        "
+      >
+        {/* Search */}
+
+        <div className="hidden md:block relative w-full max-w-2xl">
+          <Search
+            size={18}
+            className="
+              absolute
+              left-4
+              top-1/2
+              -translate-y-1/2
+              text-slate-400
+            "
+          />
+
+          <input
+            type="text"
+            placeholder="Search reports, scans..."
+            className="
+              w-full
+              h-12
+              rounded-2xl
+              border
+              border-slate-200
+              bg-slate-50
+              pl-12
+              pr-4
+              text-sm
+              text-slate-700
+              placeholder:text-slate-400
+              focus:outline-none
+              focus:ring-2
+              focus:ring-cyan-500
+              focus:border-transparent
+            "
+          />
+        </div>
+
+        {/* Right */}
+
+        <div className="flex items-center gap-2 md:gap-4 ml-auto">
+          {/* Language */}
+
+          <div
+            className="
+              flex
+              items-center
+              gap-2
+              px-4
+              h-12
+              rounded-2xl
+              border
+              border-slate-200
+              bg-white
+              shadow-sm
+            "
+          >
+            <Globe size={18} className="text-slate-500" />
+
+            <select
+              value={language}
+              onChange={handleLanguageChange}
+              className="
+                      hidden sm:block
+                      bg-transparent
+                      text-sm
+                      text-slate-700
+                      outline-none
+                      cursor-pointer
+                    "
+              >
+              <option value="en">English</option>
+
+              <option value="hi">हिन्दी</option>
+
+              <option value="mr">Marathi</option>
+            </select>
+          </div>
+
+          {/* Theme Toggle */}
+
+          <button
+            onClick={toggleTheme}
+            className="
+              w-12
+              h-12
+              rounded-2xl
+              border
+              border-slate-200
+              bg-white
+              shadow-sm
+              flex
+              items-center
+              justify-center
+              hover:bg-slate-50
+              transition
+            "
+          >
+            {theme === "light" ? (
+              <Moon size={18} className="text-slate-600" />
+            ) : (
+              <Sun size={18} className="text-yellow-500" />
+            )}
+          </button>
+        </div>
+      </header>
+    </>
   );
 }
 

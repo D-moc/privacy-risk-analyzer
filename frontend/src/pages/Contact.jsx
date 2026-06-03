@@ -1,9 +1,17 @@
-import Navbar from "../components/Navbar";
-import { motion } from "framer-motion";
-import { Mail, Phone, MapPin } from "lucide-react";
-import emailjs from "@emailjs/browser";
 import { useState } from "react";
+import { motion } from "framer-motion";
+import {
+  Mail,
+  Phone,
+  MapPin,
+  Send,
+} from "lucide-react";
+
+import emailjs from "@emailjs/browser";
 import { toast } from "react-toastify";
+
+import Sidebar from "../components/Sidebar";
+import Navbar from "../components/Navbar";
 
 function Contact() {
   const [form, setForm] = useState({
@@ -14,14 +22,16 @@ function Contact() {
 
   const [loading, setLoading] = useState(false);
 
-  // HANDLE INPUT
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value,
+    });
   };
 
-  // SEND EMAIL
   const sendEmail = (e) => {
     e.preventDefault();
+
     setLoading(true);
 
     emailjs
@@ -31,126 +41,202 @@ function Contact() {
         form,
         import.meta.env.VITE_EMAILJS_PUBLIC_KEY
       )
-      .then(
-        () => {
-          toast.success("Message sent successfully 🚀");
-          setForm({ user_name: "", user_email: "", message: "" });
-          setLoading(false);
-        },
-        (error) => {
-          toast.error("Failed to send message ❌");
-          console.log(error);
-          setLoading(false);
-        }
-      );
+      .then(() => {
+        toast.success(
+          "Message sent successfully 🚀"
+        );
+
+        setForm({
+          user_name: "",
+          user_email: "",
+          message: "",
+        });
+
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.log(error);
+
+        toast.error(
+          "Failed to send message ❌"
+        );
+
+        setLoading(false);
+      });
   };
 
   return (
-    <div className="bg-[#f8f6f2] min-h-screen text-gray-800">
+    <div className="min-h-screen bg-slate-50">
 
-      <Navbar />
+      <Sidebar />
 
-      {/* HEADER */}
-      <div className="pt-32 text-center px-6 max-w-3xl mx-auto">
+      <div className="ml-0 lg:ml-72">
 
-        <motion.h1
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-4xl md:text-5xl font-bold text-gray-900"
-        >
-          Get in Touch
-        </motion.h1>
+        <Navbar />
 
-        <p className="mt-4 text-gray-600 text-lg">
-          Have questions? We’d love to hear from you.
-        </p>
+        <main className="pt-28 px-8 pb-8">
+
+          <div className="max-w-7xl mx-auto">
+
+            {/* Header */}
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-10"
+            >
+              <span className="inline-flex px-4 py-1 rounded-full bg-cyan-50 text-cyan-600 text-sm font-medium border border-cyan-100">
+                Contact Us
+              </span>
+
+              <h1 className="mt-5 text-5xl font-bold text-slate-900">
+                Get In Touch
+              </h1>
+
+              <p className="mt-4 text-lg text-slate-600 max-w-3xl">
+                Have questions, suggestions, or feedback?
+                We'd love to hear from you.
+              </p>
+            </motion.div>
+
+            <div className="grid lg:grid-cols-2 gap-8">
+
+              {/* Contact Form */}
+
+              <motion.form
+                onSubmit={sendEmail}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="bg-white rounded-3xl border border-slate-200 shadow-sm p-8"
+              >
+                <h2 className="text-2xl font-bold text-slate-900 mb-6">
+                  Send a Message
+                </h2>
+
+                <div className="space-y-5">
+
+                  <input
+                    type="text"
+                    name="user_name"
+                    value={form.user_name}
+                    onChange={handleChange}
+                    placeholder="Your Name"
+                    required
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                  />
+
+                  <input
+                    type="email"
+                    name="user_email"
+                    value={form.user_email}
+                    onChange={handleChange}
+                    placeholder="Email Address"
+                    required
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                  />
+
+                  <textarea
+                    rows="6"
+                    name="message"
+                    value={form.message}
+                    onChange={handleChange}
+                    placeholder="Your Message"
+                    required
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 resize-none focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                  />
+
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full h-12 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-medium hover:opacity-90 transition flex items-center justify-center gap-2"
+                  >
+                    <Send size={18} />
+
+                    {loading
+                      ? "Sending..."
+                      : "Send Message"}
+                  </button>
+
+                </div>
+              </motion.form>
+
+              {/* Contact Info */}
+
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="space-y-6"
+              >
+
+                <InfoCard
+                  icon={<Mail size={22} />}
+                  title="Email"
+                  value="support@privacylens.com"
+                />
+
+                <InfoCard
+                  icon={<Phone size={22} />}
+                  title="Phone"
+                  value="+91 9876543210"
+                />
+
+                <InfoCard
+                  icon={<MapPin size={22} />}
+                  title="Location"
+                  value="Mumbai, Maharashtra, India"
+                />
+
+                {/* Vision Card */}
+
+                <div className="bg-gradient-to-r from-cyan-500 to-blue-600 rounded-3xl p-8 text-white">
+
+                  <h3 className="text-2xl font-bold">
+                    PrivacyLens
+                  </h3>
+
+                  <p className="mt-4 text-cyan-50 leading-relaxed">
+                    Empowering users with AI-driven
+                    privacy policy analysis and
+                    transparent insights into data
+                    collection, tracking, and online
+                    privacy risks.
+                  </p>
+
+                </div>
+
+              </motion.div>
+
+            </div>
+
+          </div>
+
+        </main>
 
       </div>
-
-      {/* MAIN */}
-      <div className="mt-16 px-6 md:px-16 max-w-6xl mx-auto grid md:grid-cols-2 gap-10">
-
-        {/* FORM */}
-        <motion.form
-          onSubmit={sendEmail}
-          initial={{ opacity: 0, x: -40 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="bg-white p-8 rounded-xl shadow-md border"
-        >
-
-          <h2 className="text-xl font-semibold mb-6">
-            Send a Message
-          </h2>
-
-          <input
-            type="text"
-            name="user_name"
-            value={form.user_name}
-            onChange={handleChange}
-            placeholder="Your Name"
-            className="w-full border p-3 rounded mb-4 focus:border-blue-500"
-            required
-          />
-
-          <input
-            type="email"
-            name="user_email"
-            value={form.user_email}
-            onChange={handleChange}
-            placeholder="Email Address"
-            className="w-full border p-3 rounded mb-4 focus:border-blue-500"
-            required
-          />
-
-          <textarea
-            name="message"
-            value={form.message}
-            onChange={handleChange}
-            placeholder="Your Message"
-            rows="5"
-            className="w-full border p-3 rounded mb-4 focus:border-blue-500"
-            required
-          />
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-600 text-white py-3 rounded hover:bg-blue-700 transition"
-          >
-            {loading ? "Sending..." : "Send Message"}
-          </button>
-
-        </motion.form>
-
-        {/* INFO */}
-        <motion.div
-          initial={{ opacity: 0, x: 40 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="flex flex-col justify-center gap-6"
-        >
-
-          <InfoCard icon={<Mail />} title="Email" value="support@privacyai.com" />
-          <InfoCard icon={<Phone />} title="Phone" value="+91 9876543210" />
-          <InfoCard icon={<MapPin />} title="Location" value="Mumbai, India" />
-
-        </motion.div>
-
-      </div>
-
-      <div className="h-20"></div>
 
     </div>
   );
 }
 
-/* INFO CARD */
-function InfoCard({ icon, title, value }) {
+function InfoCard({
+  icon,
+  title,
+  value,
+}) {
   return (
-    <div className="flex items-center gap-4 bg-white p-5 rounded-xl shadow border hover:shadow-md transition">
-      <div className="text-blue-600">{icon}</div>
+    <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 flex items-center gap-4">
+      <div className="w-12 h-12 rounded-2xl bg-cyan-50 text-cyan-600 flex items-center justify-center">
+        {icon}
+      </div>
+
       <div>
-        <h3 className="font-semibold">{title}</h3>
-        <p className="text-gray-600 text-sm">{value}</p>
+        <h3 className="font-semibold text-slate-900">
+          {title}
+        </h3>
+
+        <p className="text-slate-600">
+          {value}
+        </p>
       </div>
     </div>
   );

@@ -1,63 +1,119 @@
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import { ToastContainer } from "react-toastify";
 
-import Navbar from "./components/Navbar";
-import ChatbotDrawer from "./components/ChatbotDrawer";
-
 import Home from "./pages/Home";
+import Dashboard from "./pages/Dashboard";
 import About from "./pages/About";
 import Team from "./pages/Team";
+import Assistant from "./pages/Assistant";
 import Contact from "./pages/Contact";
+import History from "./pages/History";
+import Extension from "./pages/Extension";
+
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-import Dashboard from "./pages/Dashboard";
-import Footer from "./components/Footer";
+import ForgotPassword from "./pages/ForgotPassword";
+
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
-  const location = useLocation();
-
   return (
-    <div className="bg-[#f8f6f2] min-h-screen overflow-x-hidden">
+    <div className="min-h-screen overflow-x-hidden bg-slate-50">
+      <ToastContainer position="top-right" autoClose={3000} theme="light" />
 
-      {/* NAVBAR */}
-      <Navbar />
+      <AnimatePresence mode="wait">
+        <Routes>
+          {/* Default */}
+          <Route path="/" element={<Login />} />
 
-      {/* CONTENT */}
-      <div className="pt-[80px]">
+          {/* Auth */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
 
-        {/* TOAST */}
-        <ToastContainer />
 
-        <AnimatePresence mode="wait">
-          <Routes location={location} key={location.pathname}>
+          {/*Dashboard */}
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
 
-            {/* ONE PAGE */}
-            <Route
-              path="/"
-              element={
-                <>
-                  <section id="home"><Home /></section>
-                  <section id="about"><About /></section>
-                  <section id="team"><Team /></section>
-                  <section id="contact"><Contact /></section>
-                  <Footer />
-                </>
-              }
-            />
+          {/* Home */}
+          <Route
+            path="/home"
+            element={
+              <ProtectedRoute>
+                <Home />
+              </ProtectedRoute>
+            }
+          />
 
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/dashboard" element={<Dashboard />} />
+          {/* About */}
+          <Route
+            path="/about"
+            element={
+              <ProtectedRoute>
+                <About />
+              </ProtectedRoute>
+            }
+          />
 
-          </Routes>
-        </AnimatePresence>
+          {/* Team */}
+          <Route
+            path="/team"
+            element={
+              <ProtectedRoute>
+                <Team />
+              </ProtectedRoute>
+            }
+          />
 
-      </div>
+          {/* AI Assistant */}
+          <Route
+            path="/assistant"
+            element={
+              <ProtectedRoute>
+                <Assistant />
+              </ProtectedRoute>
+            }
+          />
 
-      {/* CHATBOT */}
-      <ChatbotDrawer />
+          {/* Contact */}
+          <Route
+            path="/contact"
+            element={
+              <ProtectedRoute>
+                <Contact />
+              </ProtectedRoute>
+            }
+          />
 
+          {/* History */}
+          <Route
+            path="/history"
+            element={
+              <ProtectedRoute>
+                <History />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Chrome Extension */}
+          <Route
+            path="/extension"
+            element={
+              <ProtectedRoute>
+                <Extension />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </AnimatePresence>
     </div>
   );
 }

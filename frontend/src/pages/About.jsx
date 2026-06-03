@@ -1,133 +1,175 @@
-import Navbar from "../components/Navbar";
 import { motion } from "framer-motion";
+import Sidebar from "../components/Sidebar";
+import Navbar from "../components/Navbar";
 
 function About() {
   return (
-    <div className="bg-[#f8f6f2] min-h-screen text-gray-800">
+    <div className="min-h-screen bg-slate-50">
 
-      <Navbar />
+      {/* Fixed Sidebar */}
+      <Sidebar />
 
-      {/* HERO */}
-      <div className="pt-32 text-center px-6 max-w-4xl mx-auto">
+      {/* Main Area */}
+      <div className="ml-0 lg:ml-72">
 
-        <motion.h1
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-4xl md:text-5xl font-bold text-gray-900"
-        >
-          About PrivacyAI
-        </motion.h1>
+        {/* Fixed Navbar */}
+        <Navbar />
 
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          className="mt-6 text-gray-600 text-lg"
-        >
-          We simplify complex privacy policies into clear, understandable insights
-          using AI so users can make informed decisions.
-        </motion.p>
+        {/* Content */}
+        <main className="pt-28 px-8 pb-8">
+
+          <div className="max-w-7xl mx-auto">
+
+            {/* Header */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-12"
+            >
+              <h1 className="mt-5 text-5xl font-bold text-slate-900">
+                AI-Powered Privacy Intelligence
+              </h1>
+
+              <p className="mt-5 text-lg text-slate-600 max-w-3xl leading-relaxed">
+                PrivacyLens helps users understand privacy policies
+                instantly by transforming complex legal documents into
+                simple, actionable insights using artificial intelligence.
+              </p>
+            </motion.div>
+
+            {/* Feature Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+              <motion.div
+                whileHover={{ y: -5 }}
+                className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm"
+              >
+                <div className="w-12 h-12 rounded-2xl bg-cyan-50 flex items-center justify-center mb-4">
+                  <span className="text-xl">🤖</span>
+                </div>
+
+                <h3 className="text-xl font-semibold text-slate-900">
+                  AI Analysis
+                </h3>
+
+                <p className="mt-3 text-slate-600">
+                  Automatically scans privacy policies and identifies
+                  important clauses, hidden risks, and critical user rights.
+                </p>
+              </motion.div>
+
+              <motion.div
+                whileHover={{ y: -5 }}
+                className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm"
+              >
+                <div className="w-12 h-12 rounded-2xl bg-green-50 flex items-center justify-center mb-4">
+                  <span className="text-xl">🛡️</span>
+                </div>
+
+                <h3 className="text-xl font-semibold text-slate-900">
+                  Risk Detection
+                </h3>
+
+                <p className="mt-3 text-slate-600">
+                  Highlights potential privacy concerns such as
+                  excessive tracking, third-party sharing, and
+                  data retention issues.
+                </p>
+              </motion.div>
+
+              <motion.div
+                whileHover={{ y: -5 }}
+                className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm"
+              >
+                <div className="w-12 h-12 rounded-2xl bg-purple-50 flex items-center justify-center mb-4">
+                  <span className="text-xl">📄</span>
+                </div>
+
+                <h3 className="text-xl font-semibold text-slate-900">
+                  Simple Summaries
+                </h3>
+
+                <p className="mt-3 text-slate-600">
+                  Converts legal jargon into easy-to-understand
+                  summaries so users can make informed decisions.
+                </p>
+              </motion.div>
+
+            </div>
+
+            {/* Privacy Policy Section */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="mt-10 bg-white rounded-3xl border border-slate-200 p-8 shadow-sm"
+            >
+              <h2 className="text-2xl font-bold text-slate-900">
+                What is a Privacy Policy?
+              </h2>
+
+              <p className="mt-4 text-slate-600 leading-relaxed">
+                A privacy policy is a legal document that explains how an
+                organization collects, stores, uses, and shares personal
+                information. Most users skip reading these policies because
+                they are lengthy and difficult to understand.
+              </p>
+
+              <div className="grid md:grid-cols-2 gap-6 mt-8">
+
+                <div className="bg-slate-50 rounded-2xl p-5">
+                  <h3 className="font-semibold text-slate-900">
+                    Common Information Covered
+                  </h3>
+
+                  <ul className="mt-4 space-y-3 text-slate-600">
+                    <li>✓ Data collection practices</li>
+                    <li>✓ Third-party sharing policies</li>
+                    <li>✓ Cookie and tracking technologies</li>
+                    <li>✓ Data retention periods</li>
+                  </ul>
+                </div>
+
+                <div className="bg-slate-50 rounded-2xl p-5">
+                  <h3 className="font-semibold text-slate-900">
+                    Why It Matters
+                  </h3>
+
+                  <ul className="mt-4 space-y-3 text-slate-600">
+                    <li>✓ Protect personal information</li>
+                    <li>✓ Understand data usage</li>
+                    <li>✓ Identify privacy risks</li>
+                    <li>✓ Make informed choices</li>
+                  </ul>
+                </div>
+
+              </div>
+            </motion.div>
+
+            {/* Mission Section */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="mt-10 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-3xl p-8 text-white"
+            >
+              <h2 className="text-3xl font-bold">
+                Our Mission
+              </h2>
+
+              <p className="mt-4 text-cyan-50 leading-relaxed max-w-4xl">
+                Privacy policies should be transparent and understandable.
+                PrivacyLens empowers users by leveraging AI to simplify
+                legal language, identify risks, and provide clear insights
+                into how their data is handled online.
+              </p>
+            </motion.div>
+
+          </div>
+
+        </main>
 
       </div>
-
-      {/* WHAT IS PRIVACY POLICY */}
-      <div className="mt-20 px-6 md:px-16 max-w-6xl mx-auto grid md:grid-cols-2 gap-10 items-center">
-
-        <motion.div
-          initial={{ opacity: 0, x: -40 }}
-          animate={{ opacity: 1, x: 0 }}
-        >
-          <h2 className="text-2xl font-semibold text-gray-900">
-            What is a Privacy Policy?
-          </h2>
-
-          <p className="mt-4 text-gray-600 leading-relaxed">
-            A privacy policy is a legal document that explains how a company
-            collects, uses, stores, and shares your personal data.
-          </p>
-
-          <p className="mt-3 text-gray-600">
-            Most users don’t read it because it’s long and complex.
-            That’s where our AI helps.
-          </p>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, x: 40 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="bg-white p-8 rounded-xl shadow border"
-        >
-          <ul className="space-y-3 text-gray-700">
-            <li>✔ Data collection details</li>
-            <li>✔ Third-party sharing</li>
-            <li>✔ Cookie usage</li>
-            <li>✔ Data retention rules</li>
-          </ul>
-        </motion.div>
-
-      </div>
-
-      {/* WHY THIS PROJECT */}
-      <div className="mt-24 px-6 md:px-16 max-w-5xl mx-auto text-center">
-
-        <motion.h2
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-2xl font-semibold text-gray-900"
-        >
-          Why We Built This
-        </motion.h2>
-
-        <p className="mt-6 text-gray-600 leading-relaxed">
-          In today’s digital world, users are forced to accept privacy policies
-          without understanding them. These documents are often lengthy and
-          written in legal language.
-        </p>
-
-        <p className="mt-3 text-gray-600">
-          PrivacyAI solves this by analyzing policies and presenting them
-          in simple, easy-to-understand language.
-        </p>
-
-      </div>
-
-      {/* FEATURES */}
-      <div className="mt-24 px-6 md:px-16 max-w-6xl mx-auto grid md:grid-cols-3 gap-8">
-
-        <FeatureCard
-          title="AI Analysis"
-          desc="Automatically reads and analyzes policies using NLP models."
-        />
-
-        <FeatureCard
-          title="Risk Score"
-          desc="Gives a clear score (0–100) to show how safe a policy is."
-        />
-
-        <FeatureCard
-          title="Simple Summary"
-          desc="Converts complex text into easy, readable explanations."
-        />
-
-      </div>
-
-      {/* SPACING BOTTOM */}
-      <div className="h-20"></div>
 
     </div>
-  );
-}
-
-/* FEATURE CARD */
-function FeatureCard({ title, desc }) {
-  return (
-    <motion.div
-      whileHover={{ scale: 1.05 }}
-      className="bg-white p-6 rounded-xl shadow-md border hover:shadow-lg transition"
-    >
-      <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
-      <p className="mt-3 text-gray-600">{desc}</p>
-    </motion.div>
   );
 }
 

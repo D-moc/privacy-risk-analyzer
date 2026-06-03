@@ -1,64 +1,92 @@
-import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import Sidebar from "../components/Sidebar";
+import Navbar from "../components/Navbar";
+import Hero from "../components/Hero";
 
 function Home() {
-  const navigate = useNavigate();
-
   return (
-    <section
-      id="home"
-      className="bg-[#f8f6f2] min-h-screen flex items-center justify-center px-6"
-    >
-      <div className="text-center max-w-4xl">
+    <div className="min-h-screen bg-slate-50">
 
-        {/* MAIN HEADING */}
-        <motion.h1
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="text-5xl md:text-7xl font-bold leading-tight text-gray-900"
-        >
-          Understand Privacy Policies
-        </motion.h1>
+      {/* Fixed Sidebar */}
+      <Sidebar />
 
-        {/* SUB HEADING */}
-        <motion.h2
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="text-4xl md:text-6xl text-blue-600 mt-4 font-semibold"
-        >
-          Before You Accept
-        </motion.h2>
+      {/* Main Area */}
+      <div className="ml-0 lg:ml-72">
 
-        {/* DESCRIPTION */}
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.4 }}
-          className="mt-6 text-gray-600 text-lg"
-        >
-          AI-powered analysis that simplifies privacy policies into clear,
-          understandable insights so you can make informed decisions.
-        </motion.p>
+        {/* Fixed Navbar */}
+        <Navbar />
 
-        {/* CTA BUTTON */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.6 }}
-          className="mt-10 flex justify-center"
-        >
-          <button
-            onClick={() => navigate("/dashboard")}
-            className="bg-blue-600 text-white px-8 py-3 rounded-xl shadow-md hover:bg-blue-700 transition text-lg font-medium"
-          >
-            Get Started
-          </button>
-        </motion.div>
+        {/* Scrollable Content */}
+        <main className="pt-28 px-8 pb-8">
+
+          {/* Hero */}
+          <Hero />
+
+          {/* Stats Cards */}
+          <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 mt-8">
+
+            <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
+              <p className="text-sm text-slate-500">
+                Scans Completed
+              </p>
+
+              <h2 className="mt-2 text-3xl font-bold text-slate-900">
+                124
+              </h2>
+
+              <p className="mt-2 text-sm text-green-600">
+                +12% this month
+              </p>
+            </div>
+
+            <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
+              <p className="text-sm text-slate-500">
+                Threats Found
+              </p>
+
+              <h2 className="mt-2 text-3xl font-bold text-slate-900">
+                8
+              </h2>
+
+              <p className="mt-2 text-sm text-red-500">
+                Needs attention
+              </p>
+            </div>
+
+            <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
+              <p className="text-sm text-slate-500">
+                Reports Generated
+              </p>
+
+              <h2 className="mt-2 text-3xl font-bold text-slate-900">
+                56
+              </h2>
+
+              <p className="mt-2 text-sm text-cyan-600">
+                Updated recently
+              </p>
+            </div>
+
+            <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
+              <p className="text-sm text-slate-500">
+                Privacy Score
+              </p>
+
+              <h2 className="mt-2 text-3xl font-bold text-slate-900">
+                92%
+              </h2>
+
+              <p className="mt-2 text-sm text-green-600">
+                Excellent
+              </p>
+            </div>
+
+          </section>
+
+            </main>
 
       </div>
-    </section>
+
+    </div>
   );
 }
 

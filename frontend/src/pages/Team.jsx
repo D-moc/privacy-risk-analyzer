@@ -1,77 +1,203 @@
-import Navbar from "../components/Navbar";
 import { motion } from "framer-motion";
+import { FaLinkedin, FaInstagram } from "react-icons/fa";
+import { FaXTwitter } from "react-icons/fa6";
+
+import Sidebar from "../components/Sidebar";
+import Navbar from "../components/Navbar";
 
 function Team() {
   return (
-    <div className="bg-[#f8f6f2] min-h-screen text-gray-800">
+    <>
+      <Sidebar />
 
-      <Navbar />
+      <div className="ml-0 lg:ml-72">
+        <Navbar />
 
-      {/* HEADER */}
-      <div className="pt-32 text-center px-6">
-        <h1 className="text-4xl md:text-5xl font-bold text-gray-900">
-          Meet Our Team
-        </h1>
-        <p className="mt-4 text-gray-600 max-w-xl mx-auto">
-          The minds behind PrivacyAI — building smarter, safer digital experiences.
-        </p>
+        <main className="pt-24 px-4 md:px-6 lg:px-8 pb-8 min-h-screen bg-slate-50">
+
+          {/* Header */}
+
+          <div className="text-center max-w-3xl mx-auto">
+            <h1 className="text-4xl md:text-5xl font-bold text-slate-900">
+              Meet Our Team
+            </h1>
+
+            <p className="mt-4 text-slate-500 text-lg">
+              The passionate team building PrivacyLens to make
+              privacy policies understandable for everyone.
+            </p>
+          </div>
+
+          {/* Team Grid */}
+
+          <div className="mt-14 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+
+            <TeamCard
+              image="/TeamPhotos/dinesh.png"
+              name="Dinesh Bishokarma"
+              role="Frontend Developer"
+              desc="Focused on building modern user experiences, responsive interfaces, and intuitive workflows."
+              linkedin="https://linkedin.com/in/your-linkedin"
+              instagram="https://instagram.com/your-instagram"
+              twitter="https://x.com/your-twitter"
+            />
+
+            <TeamCard
+              image="/TeamPhotos/dinesh.png"
+              name="Team Member"
+              role="Backend Developer"
+              desc="Designs APIs, database architecture, and ensures seamless backend integration."
+              linkedin="https://linkedin.com"
+              instagram="https://instagram.com"
+              twitter="https://x.com"
+            />
+
+            <TeamCard
+              image="/TeamPhotos/dinesh.png"
+              name="Team Member"
+              role="AI Engineer"
+              desc="Works on NLP models, risk detection systems, and AI-powered policy analysis."
+              linkedin="https://linkedin.com"
+              instagram="https://instagram.com"
+              twitter="https://x.com"
+            />
+
+          </div>
+
+        </main>
       </div>
-
-      {/* TEAM CARDS */}
-      <div className="mt-16 grid md:grid-cols-3 gap-8 px-6 md:px-16 max-w-6xl mx-auto">
-
-        <TeamCard
-          name="Dinesh Bishokarma"
-          role="Frontend Developer"
-          desc="Focused on building clean UI and user-friendly experiences."
-        />
-
-        <TeamCard
-          name="Team Member"
-          role="Backend Developer"
-          desc="Handles APIs, data processing, and system logic."
-        />
-
-        <TeamCard
-          name="Team Member"
-          role="AI Engineer"
-          desc="Works on NLP models and AI-powered analysis."
-        />
-
-      </div>
-
-    </div>
+    </>
   );
 }
 
-/* TEAM CARD */
-function TeamCard({ name, role, desc }) {
+function TeamCard({
+  image,
+  name,
+  role,
+  desc,
+  linkedin,
+  instagram,
+  twitter,
+}) {
   return (
     <motion.div
-      whileHover={{ scale: 1.05 }}
-      className="bg-white p-6 rounded-xl shadow-md border hover:shadow-lg transition text-center"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileHover={{ y: -6 }}
+      transition={{ duration: 0.3 }}
+      className="
+        bg-white
+        rounded-3xl
+        p-8
+        border
+        border-slate-200
+        shadow-sm
+        hover:shadow-xl
+        transition-all
+        text-center
+      "
     >
-      {/* PROFILE IMAGE */}
+      {/* Profile Image */}
+
       <img
-        src="https://via.placeholder.com/120"
-        alt="profile"
-        className="mx-auto rounded-full w-24 h-24 object-cover"
+        src={image}
+        alt={name}
+        className="
+          w-32
+          h-32
+          rounded-full
+          object-cover
+          mx-auto
+          border-4
+          border-cyan-100
+          shadow-md
+        "
       />
 
-      {/* NAME */}
-      <h3 className="mt-4 text-lg font-semibold text-gray-900">
+      {/* Name */}
+
+      <h3 className="mt-5 text-xl font-bold text-slate-900">
         {name}
       </h3>
 
-      {/* ROLE */}
-      <p className="text-blue-600 text-sm font-medium">
+      {/* Role */}
+
+      <p className="mt-1 text-cyan-600 font-medium">
         {role}
       </p>
 
-      {/* DESCRIPTION */}
-      <p className="mt-3 text-gray-600 text-sm">
+      {/* Description */}
+
+      <p className="mt-4 text-slate-500 text-sm leading-relaxed">
         {desc}
       </p>
+
+      {/* Socials */}
+
+      <div className="mt-6 flex justify-center gap-3">
+
+        <a
+          href={linkedin}
+          target="_blank"
+          rel="noreferrer"
+          className="
+            w-10
+            h-10
+            rounded-xl
+            bg-blue-50
+            text-blue-600
+            flex
+            items-center
+            justify-center
+            hover:scale-110
+            transition
+          "
+        >
+          <FaLinkedin size={18} />
+        </a>
+
+        <a
+          href={instagram}
+          target="_blank"
+          rel="noreferrer"
+          className="
+            w-10
+            h-10
+            rounded-xl
+            bg-pink-50
+            text-pink-600
+            flex
+            items-center
+            justify-center
+            hover:scale-110
+            transition
+          "
+        >
+          <FaInstagram size={18} />
+        </a>
+
+        <a
+          href={twitter}
+          target="_blank"
+          rel="noreferrer"
+          className="
+            w-10
+            h-10
+            rounded-xl
+            bg-slate-100
+            text-slate-700
+            flex
+            items-center
+            justify-center
+            hover:scale-110
+            transition
+          "
+        >
+          <FaXTwitter size={18} />
+        </a>
+
+      </div>
+
     </motion.div>
   );
 }
