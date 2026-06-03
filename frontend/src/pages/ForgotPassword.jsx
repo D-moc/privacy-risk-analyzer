@@ -57,9 +57,9 @@ function ForgotPassword() {
     <div className="min-h-screen bg-white flex items-center justify-center relative overflow-hidden p-6">
       {/* Background */}
       <div className="absolute inset-0">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#e5e7eb_1px,transparent_1px),linear-gradient(to_bottom,#e5e7eb_1px,transparent_1px)] bg-[size:80px_80px]" />
-        <div className="absolute -left-40 top-0 h-full w-[500px] bg-cyan-300/25 blur-[140px]" />
-        <div className="absolute -right-40 bottom-0 h-full w-[500px] bg-blue-300/25 blur-[140px]" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#e5e7eb_1px,transparent_1px),linear-gradient(to_bottom,#e5e7eb_1px,transparent_1px)] bg-size-[80px_80px]" />
+        <div className="absolute -left-40 top-0 h-full w-125 bg-cyan-300/25 blur-[140px]" />
+        <div className="absolute -right-40 bottom-0 h-full w-125 bg-blue-300/25 blur-[140px]" />
       </div>
 
       {/* Top-left branding */}
@@ -69,26 +69,6 @@ function ForgotPassword() {
         transition={{ duration: 0.5 }}
         className="absolute top-8 left-10 z-10"
       >
-        <div className="flex items-center gap-3 bg-white border border-slate-200 shadow-md shadow-slate-200/60 rounded-2xl px-4 py-2.5">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold text-sm shadow shadow-cyan-500/30 flex-shrink-0">
-            P
-          </div>
-          <div className="w-px h-7 bg-slate-200" />
-          <div>
-            <p className="text-sm font-bold text-slate-900 leading-tight">
-              Privacy<span className="text-cyan-600">Lens</span>
-            </p>
-            <p className="text-[10px] text-slate-400 leading-tight">
-              AI Powered Privacy Intelligence
-            </p>
-          </div>
-          <div className="flex items-center gap-1.5 ml-1 bg-cyan-50 border border-cyan-100 rounded-full px-2 py-0.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse" />
-            <span className="text-[10px] font-semibold text-cyan-600">
-              Live
-            </span>
-          </div>
-        </div>
       </motion.div>
 
       {/* Card */}
@@ -129,7 +109,7 @@ function ForgotPassword() {
               <div className="relative mt-1.5">
                 <Mail
                   size={15}
-                  className="absolute left-3.5 top-[13px] text-slate-400"
+                  className="absolute left-3.5 top-3.25 text-slate-400"
                 />
                 <input
                   type="email"
@@ -145,7 +125,7 @@ function ForgotPassword() {
             <button
               onClick={handleResetPassword}
               disabled={loading}
-              className="w-full h-11 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold text-sm shadow-lg shadow-cyan-500/25 hover:scale-[1.01] transition disabled:opacity-60"
+              className="w-full h-11 rounded-xl bg-linear-to-r from-cyan-500 to-blue-600 text-white font-semibold text-sm shadow-lg shadow-cyan-500/25 hover:scale-[1.01] transition disabled:opacity-60"
             >
               {loading ? "Sending..." : "Send Reset Link"}
             </button>
