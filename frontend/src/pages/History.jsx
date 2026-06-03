@@ -67,9 +67,6 @@ function History() {
               animate={{ opacity: 1, y: 0 }}
               className="mb-10"
             >
-              <span className="inline-flex px-4 py-1 rounded-full bg-cyan-50 text-cyan-600 text-sm font-medium border border-cyan-100">
-                Scan History
-              </span>
 
               <h1 className="mt-5 text-5xl font-bold text-slate-900">
                 Privacy Analysis History

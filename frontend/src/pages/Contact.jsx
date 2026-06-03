@@ -17,6 +17,7 @@ function Contact() {
   const [form, setForm] = useState({
     user_name: "",
     user_email: "",
+    subject: "",
     message: "",
   });
 
@@ -49,6 +50,7 @@ function Contact() {
         setForm({
           user_name: "",
           user_email: "",
+          subject: "",
           message: "",
         });
 
@@ -85,18 +87,17 @@ function Contact() {
               animate={{ opacity: 1, y: 0 }}
               className="mb-10"
             >
-              <span className="inline-flex px-4 py-1 rounded-full bg-cyan-50 text-cyan-600 text-sm font-medium border border-cyan-100">
-                Contact Us
-              </span>
 
               <h1 className="mt-5 text-5xl font-bold text-slate-900">
-                Get In Touch
+                Let's Start a Conversation
               </h1>
 
               <p className="mt-4 text-lg text-slate-600 max-w-3xl">
-                Have questions, suggestions, or feedback?
-                We'd love to hear from you.
+                Whether you have a question about PrivacyLens,
+                partnership opportunities, feature requests,
+                or feedback, our team is ready to help.
               </p>
+
             </motion.div>
 
             <div className="grid lg:grid-cols-2 gap-8">
@@ -107,7 +108,16 @@ function Contact() {
                 onSubmit={sendEmail}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                className="bg-white rounded-3xl border border-slate-200 shadow-sm p-8"
+                className="
+                  bg-white
+                  rounded-[32px]
+                  border
+                  border-slate-200
+                  shadow-lg
+                  shadow-slate-100
+                  p-8
+                  lg:p-10
+                "
               >
                 <h2 className="text-2xl font-bold text-slate-900 mb-6">
                   Send a Message
@@ -115,24 +125,71 @@ function Contact() {
 
                 <div className="space-y-5">
 
-                  <input
-                    type="text"
-                    name="user_name"
-                    value={form.user_name}
-                    onChange={handleChange}
-                    placeholder="Your Name"
-                    required
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                  />
+                  <div className="grid md:grid-cols-2 gap-4">
+
+                    <input
+                      type="text"
+                      name="user_name"
+                      value={form.user_name}
+                      onChange={handleChange}
+                      placeholder="Your Name"
+                      required
+                      className="
+                        w-full
+                        px-4
+                        py-3
+                        rounded-2xl
+                        border
+                        border-slate-200
+                        bg-slate-50
+                        focus:outline-none
+                        focus:ring-2
+                        focus:ring-cyan-500
+                      "
+                    />
+
+                    <input
+                      type="email"
+                      name="user_email"
+                      value={form.user_email}
+                      onChange={handleChange}
+                      placeholder="Email Address"
+                      required
+                      className="
+                        w-full
+                        px-4
+                        py-3
+                        rounded-2xl
+                        border
+                        border-slate-200
+                        bg-slate-50
+                        focus:outline-none
+                        focus:ring-2
+                        focus:ring-cyan-500
+                      "
+                    />
+
+                  </div>
 
                   <input
-                    type="email"
-                    name="user_email"
-                    value={form.user_email}
+                    type="text"
+                    name="subject"
+                    value={form.subject}
                     onChange={handleChange}
-                    placeholder="Email Address"
+                    placeholder="Subject"
                     required
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                    className="
+                      w-full
+                      px-4
+                      py-3
+                      rounded-2xl
+                      border
+                      border-slate-200
+                      bg-slate-50
+                      focus:outline-none
+                      focus:ring-2
+                      focus:ring-cyan-500
+                    "
                   />
 
                   <textarea
@@ -140,20 +197,49 @@ function Contact() {
                     name="message"
                     value={form.message}
                     onChange={handleChange}
-                    placeholder="Your Message"
+                    placeholder="Tell us how we can help..."
                     required
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 resize-none focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                    className="
+                      w-full
+                      px-4
+                      py-3
+                      rounded-2xl
+                      border
+                      border-slate-200
+                      bg-slate-50
+                      resize-none
+                      focus:outline-none
+                      focus:ring-2
+                      focus:ring-cyan-500
+                    "
                   />
 
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full h-12 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-medium hover:opacity-90 transition flex items-center justify-center gap-2"
+                    className="
+                      w-full
+                      h-14
+                      rounded-2xl
+                      bg-gradient-to-r
+                      from-cyan-500
+                      to-blue-600
+                      text-white
+                      font-semibold
+                      flex
+                      items-center
+                      justify-center
+                      gap-2
+                      hover:scale-[1.01]
+                      transition
+                      shadow-lg
+                      shadow-cyan-500/20
+                    "
                   >
                     <Send size={18} />
 
                     {loading
-                      ? "Sending..."
+                      ? "Sending Message..."
                       : "Send Message"}
                   </button>
 
@@ -185,8 +271,6 @@ function Contact() {
                   title="Location"
                   value="Mumbai, Maharashtra, India"
                 />
-
-                {/* Vision Card */}
 
                 <div className="bg-gradient-to-r from-cyan-500 to-blue-600 rounded-3xl p-8 text-white">
 
