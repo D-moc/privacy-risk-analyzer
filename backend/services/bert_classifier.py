@@ -1,29 +1,76 @@
 from transformers import pipeline
 
-classifier = pipeline(
-    "sentiment-analysis",
-    model="distilbert-base-uncased-finetuned-sst-2-english",
-    device=-1  # CPU
-)
+classifier = None
+
+LABELS = [
+    "Data Collection",
+    "Data Sharing",
+    "Cookies and Tracking",
+    "Data Retention",
+    "Advertising",
+    "Location Access",
+    "User Rights",
+    "Security"
+]
+
+def get_classifier():
+    global classifier
+
+    if classifier is None:
+        print(
+            "Loading DistilBART-MNLI classifier..."
+        )
+
+        classifier = pipeline(
+            "zero-shot-classification",
+            model="valhalla/distilbart-mnli-12-1",
+            device=-1
+        )
+    return classifier
+
 
 def classify_clauses(text):
-    """
-    Classify text sentiment (used as lightweight AI signal)
-    """
 
     try:
-        # SAFETY CHECK
         if not text:
-            return []
+            return {}
 
-        # LIMIT INPUT
-        text = text[:512]
+        clf = get_classifier()
 
-        # RUN MODEL
-        results = classifier(text)
+        # Prevent very large inputs
+        text = text[:2000]
 
-        return results
+        result = clf(
+            text,
+            LABELS,
+            multi_label=True
+        )
+
+        # Always return all labels
+        output = {
+            label: 0
+            for label in LABELS
+        }
+
+        for label, score in zip(
+            result["labels"],
+            result["scores"]
+        ):
+
+            output[label] = round(
+                score * 100,
+                2
+            )
+
+        return output
 
     except Exception as e:
-        print("BERT Error:", str(e))
-        return []
+        print(
+            "Classifier Error:",
+            str(e)
+        )
+
+        return {
+            label: 0
+            for label in LABELS
+        }

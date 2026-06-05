@@ -1,27 +1,26 @@
 from fastapi import APIRouter, Request
-from transformers import pipeline
+from services.chat_service import ask_assistant
 
 router = APIRouter()
 
-# FIXED PIPELINE
-qa_pipeline = pipeline(
-    "question-answering",
-    model="distilbert-base-cased-distilled-squad"
-)
-
 @router.post("/chat")
 async def chat(request: Request):
+
     data = await request.json()
 
     question = data.get("question")
-    context = data.get("context")
+    policy_data = data.get("policy_data")
 
-    if not question or not context:
-        return {"answer": "Invalid input"}
+    if not question:
+        return {
+            "answer": "Please ask a question."
+        }
 
-    result = qa_pipeline(
-        question=question,
-        context=context
+    answer = ask_assistant(
+        question,
+        policy_data
     )
 
-    return {"answer": result["answer"]}
+    return {
+        "answer": answer
+    }

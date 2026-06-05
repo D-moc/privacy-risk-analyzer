@@ -3,7 +3,6 @@ from utils.firebase_admin import verify_firebase_token
 
 router = APIRouter(prefix="/auth")
 
-
 @router.post("/firebase")
 async def firebase_login(data: dict):
 

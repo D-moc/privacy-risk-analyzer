@@ -8,7 +8,6 @@ if not firebase_admin._apps:
 
 def verify_firebase_token(id_token: str):
     try:
-        # allow small clock drift
         return auth.verify_id_token(
             id_token,
             clock_skew_seconds=60
