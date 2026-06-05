@@ -5,45 +5,61 @@ import {
   YAxis,
   Tooltip,
   ResponsiveContainer,
-  CartesianGrid
+  CartesianGrid,
 } from "recharts";
 
 function InsightsGraph({ data }) {
-
-  // 🔥 Convert backend clauses → chart data
   const chartData = data
     ? Object.keys(data).map((key) => ({
-        name: key.replace("_", " ").toUpperCase(),
-        value: data[key]?.length || 0,
+        name: key,
+        value:
+          typeof data[key] === "number"
+            ? data[key]
+            : Array.isArray(data[key])
+            ? data[key].length
+            : 0,
       }))
     : [];
 
   return (
-    <div className="w-full h-64">
-
+    <div className="w-full h-80 min-h-80">
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={chartData}>
-
-          {/* GRID */}
+        <BarChart
+          data={chartData}
+          margin={{
+            top: 10,
+            right: 20,
+            left: 0,
+            bottom: 40,
+          }}
+        >
           <CartesianGrid strokeDasharray="3 3" />
 
-          {/* AXES */}
-          <XAxis dataKey="name" />
-          <YAxis />
+          <XAxis
+            dataKey="name"
+            angle={-20}
+            textAnchor="end"
+            interval={0}
+            height={60}
+            tick={{ fontSize: 12 }}
+          />
 
-          {/* TOOLTIP */}
-          <Tooltip />
+          <YAxis domain={[0, 100]} />
 
-          {/* BAR */}
+          <Tooltip
+            formatter={(value) => [
+              `${value}`,
+              "Score",
+            ]}
+          />
+
           <Bar
             dataKey="value"
             fill="#2563eb"
             radius={[8, 8, 0, 0]}
           />
-
         </BarChart>
       </ResponsiveContainer>
-
     </div>
   );
 }

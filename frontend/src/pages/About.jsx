@@ -16,7 +16,7 @@ function About() {
         <Navbar />
 
         {/* Content */}
-        <main className="pt-28 px-8 pb-8">
+        <main className="pt-28 px-6 md:px-8 pb-8">
 
           <div className="max-w-7xl mx-auto">
 
@@ -27,13 +27,13 @@ function About() {
               className="mb-12"
             >
               <h1 className="mt-5 text-5xl font-bold text-slate-900">
-                AI-Powered Privacy Intelligence
+                AI-Powered Privacy Policy Analyzer
               </h1>
 
-              <p className="mt-5 text-lg text-slate-600 max-w-3xl leading-relaxed">
+              <p className="mt-5 text-lg text-slate-600 max-w-8xl leading-relaxed">
                 PrivacyLens helps users understand privacy policies
                 instantly by transforming complex legal documents into
-                simple, actionable insights using artificial intelligence.
+                simple, actionable insights using AI.
               </p>
             </motion.div>
 

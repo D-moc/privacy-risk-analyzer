@@ -2,18 +2,7 @@ import { useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { useState, useRef, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import {
-  LayoutDashboard,
-  Info,
-  Users,
-  Bot,
-  Mail,
-  Clock,
-  Puzzle,
-  LogOut,
-  X,
-  Menu,
-} from "lucide-react";
+import { LogOut, X, Menu } from "lucide-react";
 
 function Sidebar() {
   const navigate = useNavigate();
@@ -64,37 +53,34 @@ function Sidebar() {
   const menuItems = [
     {
       name: "Dashboard",
-      icon: LayoutDashboard,
       path: "/dashboard",
     },
     {
       name: "About",
-      icon: Info,
       path: "/about",
     },
     {
-      name: "Teams",
-      icon: Users,
-      path: "/team",
-    },
-    {
-      name: "AI Assistant",
-      icon: Bot,
+      name: "Privacy AI",
       path: "/assistant",
     },
     {
-      name: "Contact",
-      icon: Mail,
-      path: "/contact",
+      name: "Policy Compare",
+      path: "/compare",
     },
     {
       name: "History",
-      icon: Clock,
       path: "/history",
     },
     {
+      name: "Teams",
+      path: "/team",
+    },
+    {
+      name: "Contact",
+      path: "/contact",
+    },
+    {
       name: "Chrome Extension",
-      icon: Puzzle,
       path: "/extension",
     },
   ];
@@ -117,18 +103,22 @@ function Sidebar() {
       <button
         onClick={() => setSidebarOpen(true)}
         className="
-        lg:hidden
-        fixed
-        top-5
-        left-5
-        z-60
-        p-3
-        rounded-xl
-        bg-white
-        border
-        border-slate-200
-        shadow-md
-      "
+    lg:hidden
+    fixed
+    top-5
+    left-3
+    z-70
+    w-11
+    h-11
+    rounded-xl
+    bg-white
+    border
+    border-slate-200
+    shadow-md
+    flex
+    items-center
+    justify-center
+  "
       >
         <Menu size={20} />
       </button>
@@ -156,8 +146,7 @@ function Sidebar() {
         w-72
         h-screen
         bg-white
-        border-r
-        border-slate-100
+      dark:border-slate-800
         flex
         flex-col
         z-50
@@ -169,7 +158,7 @@ function Sidebar() {
       >
         {/* Logo */}
 
-        <div className="h-20 px-5 flex items-center border-b border-slate-100">
+        <div className="h-20 px-5 flex items-center border-b border-slate-200">
           <div
             onClick={() => {
               navigate("/home");
@@ -177,56 +166,22 @@ function Sidebar() {
             }}
             className="flex items-center gap-3 cursor-pointer w-full"
           >
-            <div
-              className="
-              w-12
-              h-12
-              rounded-2xl
-              bg-linear-to-br
-              from-cyan-500
-              to-blue-600
-              flex
-              items-center
-              justify-center
-              text-white
-              font-bold
-              text-lg
-              shadow-lg
-              shadow-cyan-500/20
-            "
-            >
-              P
-            </div>
+            <div className="flex items-center gap-3">
+              <img
+                src="/logo.jpg"
+                alt="PrivacyLens"
+                className="
+      w-12
+      h-12
+      rounded-xl
+      object-cover
+    "
+              />
 
-            <div className="flex-1 min-w-0">
-              <h1 className="text-[18px] font-bold leading-tight text-slate-900">
+              <h1 className="text-xl font-bold text-slate-900">
                 Privacy
                 <span className="text-cyan-600">Lens</span>
               </h1>
-
-              <p className="text-[11px] italic text-slate-500 leading-tight">
-                AI-Powered Policy Analyzer
-              </p>
-            </div>
-
-            <div
-              className="
-              flex
-              items-center
-              gap-1
-              px-2
-              py-1
-              rounded-full
-              bg-cyan-50
-              border
-              border-cyan-100
-            "
-            >
-              <span className="w-2 h-2 bg-cyan-500 rounded-full animate-pulse" />
-
-              <span className="text-[10px] font-semibold text-cyan-600">
-                Live
-              </span>
             </div>
 
             {/* Mobile Close */}
@@ -256,30 +211,18 @@ function Sidebar() {
 
           <div className="space-y-1">
             {menuItems.map((item) => {
-              const Icon = item.icon;
               const active = location.pathname === item.path;
 
               return (
                 <button
                   key={item.name}
                   onClick={() => navigate(item.path)}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 text-sm font-medium ${
+                  className={`w-full text-left px-4 py-3 rounded-xl transition-all duration-200 text-base font-semibold ${
                     active
-                      ? "bg-linear-to-r from-cyan-500 to-blue-600 text-white shadow-md shadow-cyan-500/20"
+                      ? "bg-cyan-50 text-cyan-700 border-l-4 border-cyan-500"
                       : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                   }`}
                 >
-                  <div
-                    className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
-                      active ? "bg-white/20" : "bg-slate-100"
-                    }`}
-                  >
-                    <Icon
-                      size={16}
-                      className={active ? "text-white" : "text-slate-500"}
-                    />
-                  </div>
-
                   <span>{item.name}</span>
                 </button>
               );
@@ -290,7 +233,7 @@ function Sidebar() {
         {/* Bottom Profile Section */}
         <div
           ref={profileRef}
-          className="shrink-0 px-3 py-4 border-t border-slate-100 space-y-2"
+          className="shrink-0 px-3 py-4  space-y-2"
         >
           {/* Profile Card */}
           <button

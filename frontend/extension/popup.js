@@ -21,7 +21,7 @@ document.getElementById("analyze").onclick = async () => {
 
     pageText = results[0].result;
 
-    const res = await fetch("http://127.0.0.1:8000/api/analyze", {
+    const res = await fetch( `${import.meta.env.VITE_API_URL}/api/analyze`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -61,7 +61,7 @@ document.getElementById("analyze").onclick = async () => {
 document.getElementById("ask").onclick = async () => {
   const question = document.getElementById("question").value;
 
-  const res = await fetch("http://127.0.0.1:8000/api/chat", {
+  const res = await fetch(`${import.meta.env.VITE_API_URL}/api/chat`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

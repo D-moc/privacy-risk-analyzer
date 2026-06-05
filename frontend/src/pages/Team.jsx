@@ -13,12 +13,12 @@ function Team() {
       <div className="ml-0 lg:ml-72">
         <Navbar />
 
-        <main className="pt-24 px-4 md:px-6 lg:px-8 pb-8 min-h-screen bg-slate-50">
+        <main className="pt-28 px-6 md:px-8 pb-8">
 
           {/* Header */}
 
           <div className="text-center max-w-3xl mx-auto">
-            <h1 className="text-4xl md:text-5xl font-bold text-slate-900">
+            <h1 className="text-5xl font-bold text-slate-900">
               Meet Our Team
             </h1>
 
@@ -35,31 +35,31 @@ function Team() {
             <TeamCard
               image="/TeamPhotos/dinesh.png"
               name="Dinesh Bishokarma"
-              role="Frontend Developer"
-              desc="Focused on building modern user experiences, responsive interfaces, and intuitive workflows."
-              linkedin="https://linkedin.com/in/your-linkedin"
-              instagram="https://instagram.com/your-instagram"
-              twitter="https://x.com/your-twitter"
-            />
-
-            <TeamCard
-              image="/TeamPhotos/dinesh.png"
-              name="Team Member"
               role="Backend Developer"
-              desc="Designs APIs, database architecture, and ensures seamless backend integration."
-              linkedin="https://linkedin.com"
-              instagram="https://instagram.com"
-              twitter="https://x.com"
+              desc="Develops backend services, APIs, database integration, and core application logic powering PrivacyLens."
+              linkedin="https://www.linkedin.com/in/imdineshbk/"
+              instagram="https://www.instagram.com/__.dinesh.bk/"
+              twitter="https://x.com/imdineshbk"
             />
 
             <TeamCard
-              image="/TeamPhotos/dinesh.png"
-              name="Team Member"
+              image="/TeamPhotos/dhaarmi.jpg"
+              name="Dhaarmi Gala"
               role="AI Engineer"
-              desc="Works on NLP models, risk detection systems, and AI-powered policy analysis."
-              linkedin="https://linkedin.com"
-              instagram="https://instagram.com"
-              twitter="https://x.com"
+              desc="Builds AI-powered privacy analysis systems, risk detection models, and intelligent policy insight generation."
+              linkedin="https://www.linkedin.com/in/dhaarmigala/"
+              instagram="https://www.instagram.com/dhaarmigala/"
+              twitter="https://x.com/dhaarmigala"
+            />
+
+            <TeamCard
+              image="/TeamPhotos/aamir.jpg"
+              name="Aamir Arsiwala"
+              role="Tester"
+              desc="Responsible for quality assurance, testing privacy analysis workflows, identifying bugs, and ensuring a smooth user experience."
+              linkedin="https://www.linkedin.com/in/aamir-arsiwala/"
+              instagram="https://www.instagram.com/aamir.909/"
+              twitter="https://x.com/aamir.909"
             />
 
           </div>
@@ -103,8 +103,8 @@ function TeamCard({
         src={image}
         alt={name}
         className="
-          w-32
-          h-32
+          w-36
+          h-36
           rounded-full
           object-cover
           mx-auto

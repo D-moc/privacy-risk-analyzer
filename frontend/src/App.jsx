@@ -7,6 +7,7 @@ import Dashboard from "./pages/Dashboard";
 import About from "./pages/About";
 import Team from "./pages/Team";
 import Assistant from "./pages/Assistant";
+import Compare from "./pages/Compare";
 import Contact from "./pages/Contact";
 import History from "./pages/History";
 import Extension from "./pages/Extension";
@@ -79,6 +80,16 @@ function App() {
             element={
               <ProtectedRoute>
                 <Assistant />
+              </ProtectedRoute>
+            }
+          />
+
+           {/* Compare */}
+          <Route
+            path="/compare"
+            element={
+              <ProtectedRoute>
+                <Compare />
               </ProtectedRoute>
             }
           />

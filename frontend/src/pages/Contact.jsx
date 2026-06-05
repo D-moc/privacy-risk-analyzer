@@ -1,11 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import {
-  Mail,
-  Phone,
-  MapPin,
-  Send,
-} from "lucide-react";
+import { Mail, Phone, MapPin, Send } from "lucide-react";
 
 import emailjs from "@emailjs/browser";
 import { toast } from "react-toastify";
@@ -40,12 +35,10 @@ function Contact() {
         import.meta.env.VITE_EMAILJS_SERVICE_ID,
         import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
         form,
-        import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+        import.meta.env.VITE_EMAILJS_PUBLIC_KEY,
       )
       .then(() => {
-        toast.success(
-          "Message sent successfully 🚀"
-        );
+        toast.success("Message sent successfully");
 
         setForm({
           user_name: "",
@@ -59,9 +52,7 @@ function Contact() {
       .catch((error) => {
         console.log(error);
 
-        toast.error(
-          "Failed to send message ❌"
-        );
+        toast.error("Failed to send message");
 
         setLoading(false);
       });
@@ -69,39 +60,40 @@ function Contact() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-
       <Sidebar />
 
       <div className="ml-0 lg:ml-72">
-
         <Navbar />
 
-        <main className="pt-28 px-8 pb-8">
-
+        <main className="pt-28 px-6 md:px-8 pb-8">
           <div className="max-w-7xl mx-auto">
-
             {/* Header */}
-
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mb-10"
+              className="text-center mb-12"
             >
-
-              <h1 className="mt-5 text-5xl font-bold text-slate-900">
-                Let's Start a Conversation
+              <h1 className="text-5xl font-bold text-slate-900">
+                How Can We Help?
               </h1>
 
-              <p className="mt-4 text-lg text-slate-600 max-w-3xl">
-                Whether you have a question about PrivacyLens,
-                partnership opportunities, feature requests,
-                or feedback, our team is ready to help.
+              <p
+                className="
+    mt-5
+    text-lg
+    text-slate-600
+    max-w-3xl
+    mx-auto
+    text-center
+    leading-relaxed
+  "
+              >
+                Have a question, feature request, bug report, or partnership
+                idea?
               </p>
-
             </motion.div>
 
-            <div className="grid lg:grid-cols-2 gap-8">
-
+            <div className="max-w-2xl mx-auto">
               {/* Contact Form */}
 
               <motion.form
@@ -109,24 +101,27 @@ function Contact() {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 className="
-                  bg-white
-                  rounded-[32px]
-                  border
-                  border-slate-200
-                  shadow-lg
-                  shadow-slate-100
-                  p-8
-                  lg:p-10
-                "
+    bg-white
+    rounded-4xl
+    border
+    border-slate-200
+    p-8
+    lg:p-10
+    shadow-sm
+    hover:shadow-lg
+    transition-all
+  "
               >
                 <h2 className="text-2xl font-bold text-slate-900 mb-6">
                   Send a Message
                 </h2>
+                <p className="text-slate-500 mb-8">
+                  Fill out the form below and we'll get back to you as soon as
+                  possible.
+                </p>
 
                 <div className="space-y-5">
-
-                  <div className="grid md:grid-cols-2 gap-4">
-
+                  <div className="space-y-4">
                     <input
                       type="text"
                       name="user_name"
@@ -168,7 +163,6 @@ function Contact() {
                         focus:ring-cyan-500
                       "
                     />
-
                   </div>
 
                   <input
@@ -221,7 +215,7 @@ function Contact() {
                       w-full
                       h-14
                       rounded-2xl
-                      bg-gradient-to-r
+                      bg-linear-to-r
                       from-cyan-500
                       to-blue-600
                       text-white
@@ -238,75 +232,19 @@ function Contact() {
                   >
                     <Send size={18} />
 
-                    {loading
-                      ? "Sending Message..."
-                      : "Send Message"}
+                    {loading ? "Sending Message..." : "Send Message"}
                   </button>
-
                 </div>
               </motion.form>
-
-              {/* Contact Info */}
-
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="space-y-6"
-              >
-
-                <InfoCard
-                  icon={<Mail size={22} />}
-                  title="Email"
-                  value="support@privacylens.com"
-                />
-
-                <InfoCard
-                  icon={<Phone size={22} />}
-                  title="Phone"
-                  value="+91 9876543210"
-                />
-
-                <InfoCard
-                  icon={<MapPin size={22} />}
-                  title="Location"
-                  value="Mumbai, Maharashtra, India"
-                />
-
-                <div className="bg-gradient-to-r from-cyan-500 to-blue-600 rounded-3xl p-8 text-white">
-
-                  <h3 className="text-2xl font-bold">
-                    PrivacyLens
-                  </h3>
-
-                  <p className="mt-4 text-cyan-50 leading-relaxed">
-                    Empowering users with AI-driven
-                    privacy policy analysis and
-                    transparent insights into data
-                    collection, tracking, and online
-                    privacy risks.
-                  </p>
-
-                </div>
-
-              </motion.div>
-
             </div>
-
           </div>
-
         </main>
-
       </div>
-
     </div>
   );
 }
 
-function InfoCard({
-  icon,
-  title,
-  value,
-}) {
+function InfoCard({ icon, title, value }) {
   return (
     <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 flex items-center gap-4">
       <div className="w-12 h-12 rounded-2xl bg-cyan-50 text-cyan-600 flex items-center justify-center">
@@ -314,13 +252,9 @@ function InfoCard({
       </div>
 
       <div>
-        <h3 className="font-semibold text-slate-900">
-          {title}
-        </h3>
+        <h3 className="font-semibold text-slate-900">{title}</h3>
 
-        <p className="text-slate-600">
-          {value}
-        </p>
+        <p className="text-slate-600">{value}</p>
       </div>
     </div>
   );
