@@ -1,0 +1,35 @@
+__pycache__/
+*.pyc
+
+# Python
+venv/
+.env
+.pytest_cache/
+
+# ML training data — large, third-party, and regeneratable via
+# `python -m ml.fetch_opp115` / `python -m ml.fetch_tosdr_corpus`.
+# Trained model artifacts (backend/ml/artifacts/*.joblib) ARE committed,
+# since the app needs them at runtime and they're small (~1.2MB total).
+backend/ml/data/
+
+# Node
+node_modules/
+dist/
+build/
+
+backend/__pycache__/
+backend/.env
+
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS files
+.DS_Store
+# Claude Code local session config — not part of the app
+.claude/
