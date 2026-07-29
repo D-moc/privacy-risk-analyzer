@@ -763,6 +763,34 @@ step from the Python package install, and one this project's own
 `start.bat` does **not** do automatically. If you use `start.bat` for
 setup, still run this command manually once yourself.
 
+### 7.1b Scan fails with a scikit-learn / numpy error (e.g. `InconsistentVersionWarning`, `No module named 'sklearn...'`, or a raw unpickling `AttributeError`)
+
+**Cause**: `backend/requirements.txt` used to list dependencies with no
+version pins at all (just `scikit-learn`, `pandas`, `joblib`, etc.) — a
+fresh `pip install` at a different point in time can resolve a newer
+scikit-learn/numpy than the one the two committed model files
+(`backend/ml/artifacts/practice_model.joblib` and `severity_model.joblib`)
+were actually pickled with. `.joblib`/pickle files are **not** guaranteed
+binary-compatible across scikit-learn or numpy versions — this was
+confirmed as the actual cause of a real "scikit-learn error" report after
+someone else pulled this project and ran `pip install -r requirements.txt`
+fresh.
+
+**Fix**: `requirements.txt` now pins every dependency (including `numpy`
+and `scipy` explicitly, even though they're only transitive deps of
+`scikit-learn`/`pandas`) to the exact versions the committed model files
+were trained with. Re-run:
+```bash
+cd backend
+pip install -r requirements.txt --force-reinstall
+```
+If you ever intentionally upgrade `scikit-learn`, `numpy`, or `scipy`,
+you must retrain both models afterward (`python -m ml.train_practice_model`
+and `python -m ml.train_severity_model`) and commit the newly-produced
+`.joblib` files together with the version bump — an upgraded library
+version with the old model files is exactly the broken combination
+described above.
+
 ### 7.2 Backend fails to start: `RuntimeError: Missing FIREBASE_CREDENTIALS environment variable`
 
 **Full error text** (from `backend/utils/firebase_admin.py`):

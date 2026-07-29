@@ -1,18 +1,32 @@
-fastapi
-uvicorn
-requests
-beautifulsoup4
-pymongo
-python-dotenv
-firebase-admin
-python-multipart
-groq
-dnspython
-python-docx
-pypdf
-scikit-learn
-pandas
-joblib
-lxml
-playwright
-pytest
+fastapi==0.139.2
+uvicorn==0.51.0
+requests==2.34.2
+beautifulsoup4==4.15.0
+pymongo==4.17.0
+python-dotenv==1.2.2
+firebase-admin==7.5.0
+python-multipart==0.0.32
+groq==1.5.0
+dnspython==2.8.0
+python-docx==1.2.0
+pypdf==6.14.2
+scikit-learn==1.9.0
+pandas==3.0.5
+joblib==1.5.3
+lxml==6.1.1
+playwright==1.61.0
+pytest==9.1.1
+
+# Pinned explicitly (not just left as transitive deps of scikit-learn/
+# pandas above) because the two committed model files in
+# ml/artifacts/*.joblib were pickled with these exact numpy/scipy
+# versions. joblib/pickle files are NOT guaranteed binary-compatible
+# across numpy or scikit-learn versions — installing a newer numpy or
+# scikit-learn than these can fail to load the models at all (this is
+# a real, confirmed failure mode: a fresh `pip install` with these
+# packages unpinned resolved different versions and broke model
+# loading). If you ever need to upgrade these, retrain both models
+# (`python -m ml.train_practice_model` / `train_severity_model`) and
+# re-commit the resulting .joblib files together with the version bump.
+numpy==2.5.1
+scipy==1.18.0
