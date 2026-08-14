@@ -134,7 +134,7 @@ function Hero({ stats }) {
 
           <div className="mt-8 flex flex-wrap gap-4">
             <button
-              onClick={() => navigate("/dashboard")}
+              onClick={() => navigate("/scan")}
               className="
               h-12
               px-6

@@ -1,66 +1,12 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>PrivacyLens</title>
-  <link rel="stylesheet" href="styles.css" />
+<meta charset="UTF-8" />
+<title>PrivacyLens</title>
+  <script type="module" crossorigin src="/assets/popup-DKkuJ3LR.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/popup-BhkNrBZH.css">
 </head>
-
 <body>
-
-  <!-- HEADER -->
-  <div class="header">
-    <h3>🔐 PrivacyLens</h3>
-    <span class="power">ON</span>
-  </div>
-
-  <!-- BANNER -->
-  <div class="banner">
-    <p>Control Your Data</p>
-  </div>
-
-  <!-- RISK -->
-  <div class="card">
-    <h4>Risk Score</h4>
-    <div id="risk" class="risk low">--</div>
-    <p id="summary">Click analyze to scan this page</p>
-  </div>
-
-  <!-- ANALYZE -->
-  <button id="analyze">Analyze Page</button>
-
-  <!-- ACCORDION -->
-  <div class="accordion">
-
-    <div class="item">
-      <button onclick="toggle(this)">📊 Data Collection</button>
-      <div class="content" id="collection"></div>
-    </div>
-
-    <div class="item">
-      <button onclick="toggle(this)">📤 Data Sharing</button>
-      <div class="content" id="sharing"></div>
-    </div>
-
-    <div class="item">
-      <button onclick="toggle(this)">🍪 Cookies</button>
-      <div class="content" id="cookies"></div>
-    </div>
-
-    <div class="item">
-      <button onclick="toggle(this)">🗂 Retention</button>
-      <div class="content" id="retention"></div>
-    </div>
-
-  </div>
-
-  <!-- CHATBOT -->
-  <div class="chatbot">
-    <input id="question" placeholder="Ask about policy..." />
-    <button id="ask">Ask</button>
-    <p id="answer"></p>
-  </div>
-
-  <script src="popup.js"></script>
-
+  <div id="root"></div>
 </body>
 </html>

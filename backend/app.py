@@ -8,7 +8,12 @@ from routes import (
     compare,
     history,
     stats,
-    search
+    search,
+    ledger,
+    admin_auth,
+    admin_dashboard,
+    admin_ml_test,
+    extension_download
 )
 
 app = FastAPI(
@@ -22,6 +27,10 @@ app.add_middleware(
         "http://localhost:5173",
         "https://privacy-risk-analyzer.vercel.app",
     ],
+    # The Chrome extension's origin is "chrome-extension://<random-id>" —
+    # the id is generated per-install for unpacked/dev extensions, so it
+    # can't be listed as a fixed origin like the ones above.
+    allow_origin_regex=r"chrome-extension://.*",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -66,6 +75,36 @@ app.include_router(
 app.include_router(
     search.router,
     prefix="/api"
+)
+
+app.include_router(
+    ledger.router,
+    prefix="/api",
+    tags=["Ledger"]
+)
+
+app.include_router(
+    admin_auth.router,
+    prefix="/api",
+    tags=["Admin"]
+)
+
+app.include_router(
+    admin_dashboard.router,
+    prefix="/api",
+    tags=["Admin"]
+)
+
+app.include_router(
+    admin_ml_test.router,
+    prefix="/api",
+    tags=["Admin"]
+)
+
+app.include_router(
+    extension_download.router,
+    prefix="/api",
+    tags=["Extension"]
 )
 
 # ROOT

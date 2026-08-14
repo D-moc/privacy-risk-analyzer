@@ -1,70 +1,26 @@
-from services.cleaner import clean_text
-from services.bert_classifier import classify_clauses
-from services.dark_pattern import detect_dark_patterns
-from services.risk_engine import calculate_risk
+from services.analysis_pipeline import run_full_analysis
 
-def compare_policies(policy1, policy2):
 
-    # Policy 1
-    clean1 = clean_text(policy1)
+async def compare_policies(policy1_input, policy2_input, preference="moderate"):
+    result1 = await run_full_analysis("Policy 1", policy1_input, preference)
+    result2 = await run_full_analysis("Policy 2", policy2_input, preference)
 
-    insights1 = classify_clauses(
-        clean1
-    )
+    if result1.get("error") or result2.get("error"):
+        return {
+            "error": result1.get("error") or result2.get("error"),
+            "policy1_error": result1.get("error"),
+            "policy2_error": result2.get("error"),
+        }
 
-    dark_patterns1 = detect_dark_patterns(
-        clean1
-    )
-
-    risk1 = calculate_risk(
-        insights1,
-        dark_patterns1
-    )
-
-    # Policy 2
-    clean2 = clean_text(policy2)
-
-    insights2 = classify_clauses(
-        clean2
-    )
-
-    dark_patterns2 = detect_dark_patterns(
-        clean2
-    )
-
-    risk2 = calculate_risk(
-        insights2,
-        dark_patterns2
-    )
-
-    # Winenr
-    if risk1 < risk2:
+    if result1["risk_score"] < result2["risk_score"]:
         winner = "Policy 1"
-    elif risk2 < risk1:
+    elif result2["risk_score"] < result1["risk_score"]:
         winner = "Policy 2"
     else:
         winner = "Tie"
 
-    # Debug
-    print("Policy 1 Insights:", insights1)
-    print("Policy 1 Risk:", risk1)
-
-    print("Policy 2 Insights:", insights2)
-    print("Policy 2 Risk:", risk2)
-
-    # Response
     return {
-        "policy1": {
-            "risk_score": risk1,
-            "insights": insights1,
-            "dark_patterns": dark_patterns1
-        },
-
-        "policy2": {
-            "risk_score": risk2,
-            "insights": insights2,
-            "dark_patterns": dark_patterns2
-        },
-
-        "winner": winner
+        "policy1": result1,
+        "policy2": result2,
+        "winner": winner,
     }

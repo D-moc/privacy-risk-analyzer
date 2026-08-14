@@ -1,95 +1,103 @@
-import { useState } from "react";
-import ReactMarkdown from "react-markdown";
-import { Download, Bot } from "lucide-react";
+import { useEffect, useState } from "react";
+import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import {
+  FileText,
+  ShieldCheck,
+  AlertTriangle,
+  ScanLine,
+  ArrowRight,
+  Mail,
+  MapPin,
+  CreditCard,
+  Activity,
+  Smartphone,
+  Cookie,
+} from "lucide-react";
+
 import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
-import jsPDF from "jspdf";
-
-import Loader from "../components/Loader";
-import RiskMeter from "../components/RiskMeter";
-import InsightsGraph from "../components/InsightsGraph";
-import API from "../services/api";
 import { auth } from "../firebase";
 
+const CATEGORY_ICONS = {
+  "Contact Info": Mail,
+  Location: MapPin,
+  "Financial Info": CreditCard,
+  "Browsing & Usage Activity": Activity,
+  "Device & Identifiers": Smartphone,
+  "Cookies & Tracking": Cookie,
+};
+
 function Dashboard() {
-  const [policyText, setPolicyText] = useState("");
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [showResults, setShowResults] = useState(false);
-  const [analysis, setAnalysis] = useState(null);
   const navigate = useNavigate();
-  const [policyName, setPolicyName] = useState("");
-  const [policyUrl, setPolicyUrl] = useState("");
-  const [inputType, setInputType] = useState("text");
+  const [stats, setStats] = useState({
+    total_scans: 0,
+    threats_found: 0,
+    privacy_score: 100,
+  });
+  const [recentScans, setRecentScans] = useState([]);
+  const [ledgerRollup, setLedgerRollup] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleAnalyze = async () => {
-    if (!policyName.trim()) {
-      alert("Please enter policy name");
-      return;
-    }
+  useEffect(() => {
+    fetchOverview();
+  }, []);
 
-    if (!policyUrl.trim() && !policyText.trim() && !selectedFile) {
-      alert("Please provide a URL, policy text, or upload a file.");
-      return;
-    }
+  const fetchOverview = async () => {
     try {
-      setLoading(true);
-      setShowResults(false);
-
-      const formData = new FormData();
-
-      formData.append("policy_name", policyName);
-
-      formData.append("input", policyUrl || policyText);
-
-      if (selectedFile) {
-        formData.append("file", selectedFile);
+      const user = auth.currentUser;
+      if (!user) {
+        setLoading(false);
+        return;
       }
 
-      const token =
-  await auth.currentUser.getIdToken();
+      const token = await user.getIdToken();
+      const headers = { Authorization: `Bearer ${token}` };
+      const base = import.meta.env.VITE_API_URL;
 
-    const response = await API.post(
-  "/analyze",
-  formData,
-  {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type":
-        "multipart/form-data",
-    },
-  }
-);
+      const [statsRes, historyRes, ledgerRes] = await Promise.all([
+        axios.get(`${base}/api/stats`, { headers }),
+        axios.get(`${base}/api/history`, { headers }),
+        axios.get(`${base}/api/ledger`, { headers }),
+      ]);
 
-      setAnalysis(response.data);
-      console.log(response.data);
+      setStats(statsRes.data);
+      setRecentScans((historyRes.data || []).slice(0, 5));
 
-      setShowResults(true);
+      const entries = Array.isArray(ledgerRes.data) ? ledgerRes.data : [];
+      const rollup = Object.keys(CATEGORY_ICONS).map((category) => ({
+        category,
+        total: entries.filter((e) => e.category === category).length,
+      }));
+      setLedgerRollup(rollup);
     } catch (error) {
-      console.error("Analysis Error:", error);
+      console.error("Dashboard overview error:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const downloadPDF = () => {
-    if (!analysis) return;
-
-    const doc = new jsPDF();
-
-    doc.setFontSize(18);
-
-    doc.text("PrivacyLens AI Report", 20, 20);
-
-    doc.setFontSize(11);
-
-    const lines = doc.splitTextToSize(analysis.privacy_report, 170);
-
-    doc.text(lines, 20, 35);
-
-    doc.save(`${policyName || "PrivacyLens_Report"}.pdf`);
+  const getRiskStyle = (risk) => {
+    switch (risk) {
+      case "Low":
+        return "bg-green-100 text-green-700";
+      case "Medium":
+        return "bg-yellow-100 text-yellow-700";
+      case "High":
+        return "bg-red-100 text-red-700";
+      default:
+        return "bg-slate-100 text-slate-700";
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        Loading Dashboard...
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -98,352 +106,125 @@ function Dashboard() {
       <div className="ml-0 lg:ml-72">
         <Navbar />
 
-        <main className="pt-28 px-6 md:px-8 pb-8">
+        <main className="pt-28 px-6 md:px-8 pb-16">
           <div className="max-w-7xl mx-auto">
-            {/* HEADER */}
-
-            <div className="mb-12">
-              <h1 className="text-5xl font-bold text-slate-900">
-                Privacy Policy Analyzer
-              </h1>
-
-              <p className="mt-4 text-lg text-slate-600 max-w-8xl">
-                Paste a privacy policy or upload a policy document and receive
-                AI-powered privacy insights, risk scores, and simplified
-                summaries.
-              </p>
-            </div>
-
-            {/* ANALYZER CARD */}
-
-            <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-8">
-              <h2 className="text-2xl font-bold text-slate-900 mb-6">
-                Analyze Privacy Policy
-              </h2>
-
-              <div className="space-y-4 mb-6">
-                {/* POLICY NAME */}
-
-                <input
-                  type="text"
-                  placeholder="Policy Name"
-                  value={policyName}
-                  onChange={(e) => setPolicyName(e.target.value)}
-                  className="
-      w-full
-      border
-      border-slate-200
-      rounded-2xl
-      px-4
-      py-3
-    "
-                />
-
-                {/* CHOOSE INPUT METHOD */}
-
-                <div className="mt-4">
-                  <p className="font-medium text-slate-700 mb-3">
-                    Choose Input Method
-                  </p>
-
-                  <div className="flex flex-wrap gap-6">
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="radio"
-                        value="text"
-                        checked={inputType === "text"}
-                        onChange={(e) => setInputType(e.target.value)}
-                      />
-                      Paste Policy Text
-                    </label>
-
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="radio"
-                        value="url"
-                        checked={inputType === "url"}
-                        onChange={(e) => setInputType(e.target.value)}
-                      />
-                      Privacy Policy URL
-                    </label>
-
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="radio"
-                        value="file"
-                        checked={inputType === "file"}
-                        onChange={(e) => setInputType(e.target.value)}
-                      />
-                      Upload File
-                    </label>
-                  </div>
-                </div>
-
-                {/* URL INPUT */}
-
-                {inputType === "url" && (
-                  <input
-                    type="text"
-                    placeholder="https://example.com/privacy"
-                    value={policyUrl}
-                    onChange={(e) => setPolicyUrl(e.target.value)}
-                    className="
-        w-full
-        border
-        border-slate-200
-        rounded-2xl
-        px-4
-        py-3
-      "
-                  />
-                )}
-
-                {/* TEXT INPUT */}
-
-                {inputType === "text" && (
-                  <textarea
-                    rows="10"
-                    value={policyText}
-                    onChange={(e) => setPolicyText(e.target.value)}
-                    placeholder="Paste privacy policy text here..."
-                    className="
-        w-full
-        border
-        border-slate-200
-        rounded-2xl
-        p-4
-        resize-none
-        focus:outline-none
-        focus:ring-2
-        focus:ring-cyan-500
-      "
-                  />
-                )}
-
-                {/* FILE INPUT */}
-
-                {inputType === "file" && (
-                  <div
-                    className="
-        border-2
-        border-dashed
-        border-slate-300
-        rounded-2xl
-        p-8
-        text-center
-      "
-                  >
-                    <input
-                      type="file"
-                      accept=".pdf,.docx,.txt"
-                      onChange={(e) => setSelectedFile(e.target.files[0])}
-                    />
-
-                    {selectedFile && (
-                      <p className="mt-3 text-cyan-600 font-medium">
-                        {selectedFile.name}
-                      </p>
-                    )}
-                  </div>
-                )}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-10 flex flex-wrap items-center justify-between gap-4"
+            >
+              <div>
+                <h1 className="text-5xl font-bold text-slate-900">Dashboard</h1>
+                <p className="mt-4 text-lg text-slate-600 max-w-2xl">
+                  Your privacy activity at a glance — recent scans and what
+                  companies hold your data.
+                </p>
               </div>
-
-              {/* ANALYZE BUTTON */}
 
               <button
-                onClick={handleAnalyze}
-                className="
-                  mt-6
-                  px-6
-                  py-3
-                  rounded-xl
-                  bg-linear-to-r
-                  from-cyan-500
-                  to-blue-600
-                  text-white
-                  font-medium
-                  hover:opacity-90
-                  transition
-                "
+                onClick={() => navigate("/scan")}
+                className="flex items-center gap-2 px-6 py-3 rounded-xl bg-linear-to-r from-cyan-500 to-blue-600 text-white font-semibold shadow-lg shadow-cyan-500/25 hover:opacity-90 transition"
               >
-                Analyze Policy
+                <ScanLine size={18} />
+                Start a New Scan
               </button>
+            </motion.div>
+
+            {/* Stat cards */}
+            <div className="grid sm:grid-cols-3 gap-6 mb-8">
+              <StatCard icon={<FileText size={22} />} label="Total Scans" value={stats.total_scans} />
+              <StatCard icon={<AlertTriangle size={22} />} label="Threats Found" value={stats.threats_found} />
+              <StatCard icon={<ShieldCheck size={22} />} label="Privacy Score" value={stats.privacy_score} />
             </div>
 
-            {/* LOADER */}
-
-            {loading && (
-              <div className="mt-10">
-                <Loader />
-              </div>
-            )}
-
-            {/* RESULTS */}
-
-            {showResults && !loading && (
-              <>
-                {/* TOP CARDS */}
-
-                <div className="grid lg:grid-cols-2 gap-8 mt-10">
-                  {/* RISK */}
-
-                  <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-8 min-w-0">
-                    <RiskMeter score={analysis?.risk_score || 0} />
-                  </div>
-
-                  {/* GRAPH */}
-
-                  <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-8">
-                    <h3 className="text-xl font-semibold text-slate-900 mb-4">
-                      Policy Insights
-                    </h3>
-
-                    {/* <InsightsGraph data={analysis?.bert_labels || {}} /> */}
-                    <InsightsGraph data={analysis?.insights || {}} />
-                  </div>
+            <div className="grid lg:grid-cols-2 gap-6">
+              {/* Recent scans (from History) */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden"
+              >
+                <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+                  <h2 className="text-xl font-semibold text-slate-900">Recent Scans</h2>
+                  <button
+                    onClick={() => navigate("/history")}
+                    className="flex items-center gap-1 text-sm text-cyan-600 font-semibold hover:underline"
+                  >
+                    View all
+                    <ArrowRight size={14} />
+                  </button>
                 </div>
-                {/* PRIVACYLENS AI REPORT */}
 
-                {analysis?.privacy_report && (
-                  <div className="mt-8 bg-white rounded-3xl border border-cyan-100 shadow-sm overflow-hidden">
-                    {/* HEADER */}
-
-                    <div className="px-8 py-5 border-b border-slate-100 bg-linear-to-r from-cyan-50 to-blue-50">
-                      <h2 className="text-2xl font-bold text-slate-900">
-                        PrivacyLens AI Report
-                      </h2>
-
-                      <p className="text-sm text-slate-500 mt-1">
-                        AI-generated privacy assessment based on detected risks,
-                        tracking practices, and policy findings.
-                      </p>
-                    </div>
-
-                    {/* REPORT */}
-
-                    <div className="p-8">
-                      <div className="prose prose-slate max-w-none">
-                        <ReactMarkdown
-                          components={{
-                            h2: ({ children }) => (
-                              <h2 className="text-xl font-bold text-slate-900 mt-8 mb-3">
-                                {children}
-                              </h2>
-                            ),
-
-                            strong: ({ children }) => (
-                              <strong className="font-semibold text-slate-900">
-                                {children}
-                              </strong>
-                            ),
-
-                            p: ({ children }) => (
-                              <p className="text-slate-700 leading-7 mb-4">
-                                {children}
-                              </p>
-                            ),
-
-                            li: ({ children }) => (
-                              <li className="text-slate-700 mb-2">
-                                {children}
-                              </li>
-                            ),
-                          }}
+                {recentScans.length === 0 ? (
+                  <p className="p-6 text-slate-500 text-sm">
+                    No scans yet — start one to see it here.
+                  </p>
+                ) : (
+                  <div className="divide-y divide-slate-100">
+                    {recentScans.map((report) => (
+                      <div key={report.id} className="px-6 py-4 flex items-center justify-between">
+                        <span className="font-medium text-slate-800">{report.policy_name}</span>
+                        <span
+                          className={`px-3 py-1 rounded-full text-xs font-medium ${getRiskStyle(report.risk_level)}`}
                         >
-                          {analysis.privacy_report}
-                        </ReactMarkdown>
+                          {report.risk_level}
+                        </span>
                       </div>
-
-                      {/* ACTION BUTTONS */}
-
-                      <div className="mt-8 pt-6 border-t border-slate-100 flex flex-wrap gap-4">
-                        <button
-                          onClick={downloadPDF}
-                          className="
-                              flex
-                              items-center
-                              gap-2
-                              px-5
-                              py-3
-                              rounded-xl
-                              border
-                              border-slate-200
-                              hover:bg-slate-50
-                              transition
-                            "
-                        >
-                          <Download size={18} />
-                          Download Report
-                        </button>
-
-                        <button
-                          onClick={() =>
-                            navigate("/assistant", {
-                              state: {
-                                report: analysis?.privacy_report,
-                                risk: analysis?.risk_score,
-                                clauses: analysis?.clauses,
-                                darkPatterns: analysis?.dark_patterns,
-                              },
-                            })
-                          }
-                          className="
-            flex
-            items-center
-            gap-2
-            px-5
-            py-3
-            rounded-xl
-            bg-gradient-to-r
-            from-cyan-500
-            to-blue-600
-            text-white
-            hover:opacity-90
-            transition
-          "
-                        >
-                          <Bot size={18} />
-                          Ask AI About This Policy
-                        </button>
-                      </div>
-                    </div>
+                    ))}
                   </div>
                 )}
+              </motion.div>
 
-                {analysis?.dark_patterns?.length > 0 && (
-                  <div className="mt-8 bg-white rounded-3xl border border-red-200 shadow-sm p-8">
-                    <h2 className="text-2xl font-bold text-red-600 mb-5">
-                      Dark Patterns Detected
-                    </h2>
+              {/* Ledger rollup preview */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.05 }}
+                className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden"
+              >
+                <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+                  <h2 className="text-xl font-semibold text-slate-900">Data Ledger</h2>
+                  <button
+                    onClick={() => navigate("/ledger")}
+                    className="flex items-center gap-1 text-sm text-cyan-600 font-semibold hover:underline"
+                  >
+                    View all
+                    <ArrowRight size={14} />
+                  </button>
+                </div>
 
-                    <div className="space-y-3">
-                      {analysis.dark_patterns.map((item, index) => (
-                        <div
-                          key={index}
-                          className="
-              flex
-              items-center
-              gap-3
-              bg-red-50
-              border
-              border-red-100
-              rounded-xl
-              px-4
-              py-3
-            "
-                        >
-                          <span className="text-red-500">⚠</span>
-
-                          <span className="text-slate-700">{item}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </>
-            )}
+                <div className="divide-y divide-slate-100">
+                  {ledgerRollup.map((r) => {
+                    const Icon = CATEGORY_ICONS[r.category];
+                    return (
+                      <div key={r.category} className="px-6 py-4 flex items-center justify-between">
+                        <span className="flex items-center gap-2 text-slate-700">
+                          <Icon size={16} className="text-cyan-600" />
+                          {r.category}
+                        </span>
+                        <span className="font-semibold text-slate-900">{r.total}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            </div>
           </div>
         </main>
+      </div>
+    </div>
+  );
+}
+
+function StatCard({ icon, label, value }) {
+  return (
+    <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm flex items-center gap-4">
+      <div className="w-12 h-12 rounded-2xl bg-cyan-50 flex items-center justify-center text-cyan-600">
+        {icon}
+      </div>
+      <div>
+        <p className="text-sm text-slate-500">{label}</p>
+        <h3 className="text-2xl font-bold text-slate-900">{value}</h3>
       </div>
     </div>
   );

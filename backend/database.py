@@ -13,3 +13,6 @@ db = client[
 ]
 
 history_collection = db["history"]
+ledger_collection = db["ledger_entries"]
+scan_attempts_collection = db["scan_attempts"]
+extension_downloads_collection = db["extension_downloads"]

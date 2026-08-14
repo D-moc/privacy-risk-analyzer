@@ -1,4 +1,5 @@
 import { createContext, useEffect, useState } from "react";
+import { initExtensionAuthBridge } from "../extensionAuthBridge";
 
 export const AuthContext = createContext();
 
@@ -20,6 +21,12 @@ function AuthProvider({ children }) {
     } finally {
       setLoading(false);
     }
+  }, []);
+
+  // SYNC AUTH TOKEN TO THE CHROME EXTENSION (if installed)
+  useEffect(() => {
+    const unsubscribe = initExtensionAuthBridge();
+    return unsubscribe;
   }, []);
 
   // LOGIN

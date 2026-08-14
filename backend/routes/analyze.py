@@ -4,16 +4,11 @@ from fastapi import File
 from fastapi import Form
 from fastapi import Request
 
-from services.fetcher import fetch_policy
-from services.cleaner import clean_text
-from services.analyzer import analyze_policy
-from services.risk_engine import calculate_risk
-from services.bert_classifier import classify_clauses
-from services.dark_pattern import detect_dark_patterns
-from services.preference import adjust_risk
-from services.report_generator import generate_privacy_report
+from services.analysis_pipeline import run_full_analysis
 from services.history_service import save_analysis
-from services.file_reader import read_file
+from services.ledger_service import record_grants
+from services.file_reader import read_file, FileReadError
+from services.scan_tracking import detect_surface, log_scan_attempt
 
 from utils.firebase_admin import (
     verify_firebase_token
@@ -29,34 +24,33 @@ async def analyze(
     preference: str = Form("moderate"),
     file: UploadFile = File(None)
 ):
-    # Authentication
+    # Authentication (optional — e.g. the browser extension can scan
+    # anonymously; results are only saved to history when signed in)
     auth_header = request.headers.get(
         "Authorization"
     )
 
-    if not auth_header:
-        return {
-            "error": "Unauthorized"
-        }
+    uid = None
 
-    token = auth_header.replace(
-        "Bearer ",
-        ""
-    )
+    if auth_header:
+        token = auth_header.replace(
+            "Bearer ",
+            ""
+        )
 
-    decoded = verify_firebase_token(
-        token
-    )
+        decoded = verify_firebase_token(
+            token
+        )
 
-    if not decoded:
-        return {
-            "error": "Invalid Token"
-        }
-    uid = decoded["uid"]
-    
+        if decoded:
+            uid = decoded["uid"]
+
     # Input
     if file:
-        input_data = read_file(file)
+        try:
+            input_data = read_file(file)
+        except FileReadError as e:
+            return {"error": str(e)}
     else:
         input_data = input
 
@@ -65,72 +59,40 @@ async def analyze(
             "error": "No input provided"
         }
 
-    # Fetch & Clean
-    raw_text = fetch_policy(input_data)
-    clean = clean_text(raw_text)
-    clean = clean[:15000]
+    surface = detect_surface(request)
 
-    print("Policy Length:", len(clean))
-    print(clean[:500])
+    result = await run_full_analysis(policy_name, input_data, preference)
 
-    #Clause Analysis
-    clauses = analyze_policy(clean)
-    insights = classify_clauses(clean)
+    if result.get("error"):
+        log_scan_attempt(policy_name, surface, "not_a_policy" if result["error"] == "NOT_A_POLICY" else "error")
+        return result
 
-    
-    #Dark Patterns
-    dark_patterns = detect_dark_patterns(
-        clean
-    )
+    log_scan_attempt(policy_name, surface, "success")
 
-    #Risk Score
-    risk = calculate_risk(
-        insights,
-        dark_patterns
-    )
+    # Save History (only when signed in)
+    if uid:
+        try:
+            save_analysis({
+                "user_id": uid,
+                "policy_name": policy_name,
+                "risk_score": result["risk_score"],
+                "risk_level": result["risk_level"],
+                "privacy_report": result["privacy_report"],
+                "dark_patterns": result["dark_patterns"],
+                "clauses": result["clauses"],
+                "insights": result["insights"],
+                "data_practices": result["data_practices"],
+                "findings": result["findings"],
+                "source": result["source"],
+            })
+        except Exception as e:
+            print("Mongo Save Error:", e)
 
-    final_risk = adjust_risk(
-        risk,
-        preference
-    )
+        # Feeds the Data Exposure Ledger — best-effort, same as history
+        # above, since a ledger write failing shouldn't break the scan.
+        try:
+            record_grants(uid, policy_name, result["data_practices"])
+        except Exception as e:
+            print("Ledger Save Error:", e)
 
-    # AI Report
-    privacy_report = generate_privacy_report(
-        final_risk,
-        clauses,
-        dark_patterns
-    )
-
-    # Risk Level
-    risk_level = (
-    "Low"
-    if final_risk < 35
-    else "Medium"
-    if final_risk < 70
-    else "High"
-)
-
-    # Save History
-    try:
-        save_analysis({
-    "user_id": uid,
-    "policy_name": policy_name,
-    "risk_score": final_risk,
-    "risk_level": risk_level,
-    "privacy_report": privacy_report,
-    "dark_patterns": dark_patterns,
-    "clauses": clauses,
-    "insights": insights
-})
-
-    except Exception as e:
-        print("Mongo Save Error:", e)
-
-    # Response
-    return {
-        "privacy_report": privacy_report,
-        "risk_score": final_risk,
-        "clauses": clauses,
-        "insights": insights,
-        "dark_patterns": dark_patterns
-    }
+    return result

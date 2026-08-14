@@ -56,6 +56,10 @@ function Sidebar() {
       path: "/dashboard",
     },
     {
+      name: "Scan",
+      path: "/scan",
+    },
+    {
       name: "About",
       path: "/about",
     },
@@ -70,6 +74,10 @@ function Sidebar() {
     {
       name: "History",
       path: "/history",
+    },
+    {
+      name: "Data Ledger",
+      path: "/ledger",
     },
     {
       name: "Teams",
@@ -161,7 +169,7 @@ function Sidebar() {
         <div className="h-20 px-5 flex items-center border-b border-slate-200">
           <div
             onClick={() => {
-              navigate("/home");
+              navigate("/dashboard");
               setSidebarOpen(false);
             }}
             className="flex items-center gap-3 cursor-pointer w-full"

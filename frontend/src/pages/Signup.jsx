@@ -20,7 +20,7 @@ function Signup() {
 
   useEffect(() => {
     if (user) {
-      navigate("/home", {
+      navigate("/dashboard", {
         replace: true,
       });
     }
@@ -40,7 +40,7 @@ function Signup() {
 
     login(userData);
 
-    navigate("/home", {
+    navigate("/dashboard", {
       replace: true,
     });
   };

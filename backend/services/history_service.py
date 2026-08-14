@@ -59,6 +59,21 @@ def get_history(user_id):
                 {}
             ),
 
+            "data_practices": item.get(
+                "data_practices",
+                {"data_types": [], "protections": []}
+            ),
+
+            "findings": item.get(
+                "findings",
+                []
+            ),
+
+            "source": item.get(
+                "source",
+                "ai"
+            ),
+
             "created_at": item.get(
                 "created_at"
             )
@@ -109,6 +124,21 @@ def get_report(report_id):
         "insights": item.get(
             "insights",
             {}
+        ),
+
+        "data_practices": item.get(
+            "data_practices",
+            {"data_types": [], "protections": []}
+        ),
+
+        "findings": item.get(
+            "findings",
+            []
+        ),
+
+        "source": item.get(
+            "source",
+            "ai"
         ),
 
         "created_at": item.get(

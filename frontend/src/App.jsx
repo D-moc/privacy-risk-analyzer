@@ -2,14 +2,15 @@ import { Routes, Route } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import { ToastContainer } from "react-toastify";
 
-import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
+import Scan from "./pages/Scan";
 import About from "./pages/About";
 import Team from "./pages/Team";
 import Assistant from "./pages/Assistant";
 import Compare from "./pages/Compare";
 import Contact from "./pages/Contact";
 import History from "./pages/History";
+import Ledger from "./pages/Ledger";
 import Extension from "./pages/Extension";
 
 import Login from "./pages/Login";
@@ -17,6 +18,10 @@ import Signup from "./pages/Signup";
 import ForgotPassword from "./pages/ForgotPassword";
 
 import ProtectedRoute from "./components/ProtectedRoute";
+import AdminRoute from "./components/AdminRoute";
+import AdminLogin from "./pages/AdminLogin";
+import AdminDashboard from "./pages/AdminDashboard";
+import AdminModelLab from "./pages/AdminModelLab";
 
 function App() {
   return (
@@ -44,15 +49,16 @@ function App() {
             }
           />
 
-          {/* Home */}
+          {/* Scan (moved out of Dashboard — this is the actual scan input + results page) */}
           <Route
-            path="/home"
+            path="/scan"
             element={
               <ProtectedRoute>
-                <Home />
+                <Scan />
               </ProtectedRoute>
             }
           />
+
 
           {/* About */}
           <Route
@@ -111,6 +117,35 @@ function App() {
               <ProtectedRoute>
                 <History />
               </ProtectedRoute>
+            }
+          />
+
+          {/* Data Exposure Ledger */}
+          <Route
+            path="/ledger"
+            element={
+              <ProtectedRoute>
+                <Ledger />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Admin (separate login, not linked from the regular Sidebar) */}
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route
+            path="/admin"
+            element={
+              <AdminRoute>
+                <AdminDashboard />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/model-lab"
+            element={
+              <AdminRoute>
+                <AdminModelLab />
+              </AdminRoute>
             }
           />
 
