@@ -4,7 +4,7 @@ cd /d "%~dp0"
 if not exist ".env" (
     echo.
     echo [PrivacyLens] No .env file found in the backend folder.
-    echo Copy .env.example to .env and fill in your keys first.
+    echo Create a .env file in the backend folder and add your required keys first.
     echo.
     pause
     exit /b 1
