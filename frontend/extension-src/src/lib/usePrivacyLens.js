@@ -40,7 +40,12 @@ function normalizeUrl(url) {
 export function usePrivacyLens() {
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
   const [auth, setAuth] = useState(null);
-  const [tab, setTab] = useState({ id: null, domain: "", url: "", favicon: "" });
+  const [tab, setTab] = useState({
+    id: null,
+    domain: "",
+    url: "",
+    favicon: "",
+  });
   const [view, setView] = useState("idle"); // idle | loading | results | error
   const [loadingMessage, setLoadingMessage] = useState(LOADING_MESSAGES[0]);
   const [analysis, setAnalysis] = useState(null);
@@ -54,7 +59,11 @@ export function usePrivacyLens() {
   // ---- initial load -------------------------------------------------
   useEffect(() => {
     (async () => {
-      const [s, a, t] = await Promise.all([loadSettings(), loadAuth(), loadActiveTab()]);
+      const [s, a, t] = await Promise.all([
+        loadSettings(),
+        loadAuth(),
+        loadActiveTab(),
+      ]);
       setSettings(s);
       setAuth(a);
       setTab(t);
@@ -92,7 +101,8 @@ export function usePrivacyLens() {
       setChatLog([]);
 
       try {
-        if (HAS_CHROME && !isScannableUrl(t.url)) throw new Error("UNSCANNABLE");
+        if (HAS_CHROME && !isScannableUrl(t.url))
+          throw new Error("UNSCANNABLE");
 
         const pageText = await getPageText(t.id);
 
@@ -116,9 +126,13 @@ export function usePrivacyLens() {
         let data;
         if (link) {
           const linkedText = await fetchTextFromUrl(link);
-          console.log("PrivacyLens: linked page text length ->", linkedText?.length || 0);
+          console.log(
+            "PrivacyLens: linked page text length ->",
+            linkedText?.length || 0,
+          );
           try {
-            if (!linkedText || linkedText.trim().length < 40) throw new Error("EMPTY_LINKED_PAGE");
+            if (!linkedText || linkedText.trim().length < 40)
+              throw new Error("EMPTY_LINKED_PAGE");
             data = await analyzePolicy({
               apiUrl: s.apiUrl,
               domain: t.domain,
@@ -130,8 +144,12 @@ export function usePrivacyLens() {
             // The linked page didn't pan out (no/short text, or the
             // backend rejected it as NOT_A_POLICY) — fall back to the
             // current page's own text, today's original last resort.
-            console.warn("PrivacyLens: linked page analysis failed, falling back to current page ->", linkErr?.message);
-            if (!pageText || pageText.trim().length < 40) throw new Error("EMPTY_PAGE");
+            console.warn(
+              "PrivacyLens: linked page analysis failed, falling back to current page ->",
+              linkErr?.message,
+            );
+            if (!pageText || pageText.trim().length < 40)
+              throw new Error("EMPTY_PAGE");
             data = await analyzePolicy({
               apiUrl: s.apiUrl,
               domain: t.domain,
@@ -141,7 +159,8 @@ export function usePrivacyLens() {
             });
           }
         } else {
-          if (!pageText || pageText.trim().length < 40) throw new Error("EMPTY_PAGE");
+          if (!pageText || pageText.trim().length < 40)
+            throw new Error("EMPTY_PAGE");
           data = await analyzePolicy({
             apiUrl: s.apiUrl,
             domain: t.domain,
@@ -162,7 +181,8 @@ export function usePrivacyLens() {
         if (msg === "UNSCANNABLE") {
           setError({
             title: "This page can't be scanned",
-            message: "Browser system pages can't be analyzed. Try a regular website.",
+            message:
+              "Browser system pages can't be analyzed. Try a regular website.",
           });
         } else if (msg === "EMPTY_PAGE") {
           setError({
@@ -172,17 +192,20 @@ export function usePrivacyLens() {
         } else if (msg === "NOT_A_POLICY") {
           setError({
             title: "Couldn't find a privacy policy on this site",
-            message: "We looked for a linked privacy policy page but couldn't find or reach one. Try navigating to it directly.",
+            message:
+              "We looked for a linked privacy policy page but couldn't find or reach one. Try navigating to it directly.",
           });
         } else if (msg === "Failed to fetch" || msg === "SERVER_ERROR") {
           setError({
             title: "Can't reach the PrivacyLens server",
-            message: `Make sure the backend is running at ${s.apiUrl}.`,
+            message:
+              "The local and production PrivacyLens backends could not be reached. Please try again.",
           });
         } else if (msg === "TIMEOUT") {
           setError({
             title: "This is taking too long",
-            message: "The server didn't respond in time. It may be overloaded or stuck — try again in a moment.",
+            message:
+              "The server didn't respond in time. It may be overloaded or stuck — try again in a moment.",
           });
         } else {
           setError({
@@ -194,7 +217,7 @@ export function usePrivacyLens() {
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [settings, tab, auth]
+    [settings, tab, auth],
   );
 
   const updateSettings = useCallback(
@@ -203,7 +226,7 @@ export function usePrivacyLens() {
       setSettings(next);
       await saveSettings(next);
     },
-    [settings]
+    [settings],
   );
 
   const ask = useCallback(
@@ -212,20 +235,27 @@ export function usePrivacyLens() {
       setChatLog((log) => [...log, { role: "user", text: question }]);
       setAsking(true);
       try {
-        const answer = await askAboutPolicy({ apiUrl: settings.apiUrl, question, analysis });
+        const answer = await askAboutPolicy({
+          apiUrl: settings.apiUrl,
+          question,
+          analysis,
+        });
         setChatLog((log) => [...log, { role: "ai", text: answer }]);
       } catch {
-        setChatLog((log) => [...log, { role: "ai", text: "Couldn't reach the server." }]);
+        setChatLog((log) => [
+          ...log,
+          { role: "ai", text: "Couldn't reach the server." },
+        ]);
       } finally {
         setAsking(false);
       }
     },
-    [settings.apiUrl, analysis]
+    [settings.apiUrl, analysis],
   );
 
   const goToWebApp = useCallback(
     (path) => openWebApp(settings.webAppUrl, path),
-    [settings.webAppUrl]
+    [settings.webAppUrl],
   );
 
   const downloadReport = useCallback(() => {
