@@ -3,18 +3,35 @@ const TIMEOUT_MS = 30000;
 const PRODUCTION_API_URL =
   "https://privacy-risk-analyzer.onrender.com";
 
-async function fetchWithTimeout(url, options, ms) {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), ms);
+async function fetchWithTimeout(
+  url,
+  options,
+  ms
+) {
+  const controller =
+    new AbortController();
+
+  const timer = setTimeout(
+    () => controller.abort(),
+    ms
+  );
 
   try {
-    return await fetch(url, {
-      ...options,
-      signal: controller.signal,
-    });
+    return await fetch(
+      url,
+      {
+        ...options,
+        signal:
+          controller.signal,
+      }
+    );
   } catch (err) {
-    if (err.name === "AbortError") {
-      throw new Error("TIMEOUT");
+    if (
+      err?.name === "AbortError"
+    ) {
+      throw new Error(
+        "TIMEOUT"
+      );
     }
 
     throw err;
@@ -23,66 +40,46 @@ async function fetchWithTimeout(url, options, ms) {
   }
 }
 
-// Try the configured backend first.
-// If localhost is unavailable, automatically use Render.
-async function fetchWithFallback({
-  apiUrl,
+// ---------------------------------------------------------
+// API request
+// Production backend only
+// ---------------------------------------------------------
+
+async function request(
   path,
-  options,
-}) {
-  const primaryUrl = (apiUrl || "").replace(/\/$/, "");
+  options = {}
+) {
+  const url =
+    `${PRODUCTION_API_URL}${path}`;
 
-  const urls = [];
+  console.log(
+    "PrivacyLens: backend ->",
+    url
+  );
 
-  if (primaryUrl) {
-    urls.push(`${primaryUrl}${path}`);
+  const response =
+    await fetchWithTimeout(
+      url,
+      options,
+      TIMEOUT_MS
+    );
+
+  if (!response.ok) {
+    console.error(
+      `PrivacyLens backend returned HTTP ${response.status}`
+    );
+
+    throw new Error(
+      "SERVER_ERROR"
+    );
   }
 
-  // Don't duplicate production URL
-  if (
-    PRODUCTION_API_URL &&
-    primaryUrl !== PRODUCTION_API_URL
-  ) {
-    urls.push(`${PRODUCTION_API_URL}${path}`);
-  }
-
-  let lastError = null;
-
-  for (const url of urls) {
-    try {
-      console.log("PrivacyLens: trying backend ->", url);
-
-      const res = await fetchWithTimeout(
-        url,
-        options,
-        TIMEOUT_MS
-      );
-
-      // Network succeeded.
-      // Don't fallback for normal API errors such as 400/401/422/500.
-      if (!res.ok) {
-        throw new Error("SERVER_ERROR");
-      }
-
-      console.log("PrivacyLens: backend connected ->", url);
-
-      return res;
-    } catch (err) {
-      lastError = err;
-
-      console.warn(
-        "PrivacyLens: backend unavailable ->",
-        url,
-        err?.message
-      );
-
-      // Continue to the next backend.
-    }
-  }
-
-  throw lastError || new Error("SERVER_ERROR");
+  return response;
 }
 
+// ---------------------------------------------------------
+// Analyze Privacy Policy
+// ---------------------------------------------------------
 
 export async function analyzePolicy({
   apiUrl,
@@ -91,81 +88,103 @@ export async function analyzePolicy({
   preference,
   token,
 }) {
-  const createFormData = () => {
-    const formData = new FormData();
+  const formData =
+    new FormData();
 
-    formData.append(
-      "policy_name",
-      domain || "Untitled Policy"
-    );
+  formData.append(
+    "policy_name",
+    domain ||
+      "Untitled Policy"
+  );
 
-    formData.append(
-      "input",
-      pageText.slice(0, 20000)
-    );
+  formData.append(
+    "input",
+    pageText.slice(
+      0,
+      20000
+    )
+  );
 
-    formData.append(
-      "preference",
-      preference || "balanced"
-    );
-
-    return formData;
-  };
+  formData.append(
+    "preference",
+    preference ||
+      "moderate"
+  );
 
   const headers = {};
 
   if (token) {
-    headers.Authorization = `Bearer ${token}`;
+    headers.Authorization =
+      `Bearer ${token}`;
   }
 
-  const res = await fetchWithFallback({
-    apiUrl,
-    path: "/api/analyze",
-    options: {
-      method: "POST",
-      headers,
-      body: createFormData(),
-    },
-  });
+  const res =
+    await request(
+      "/api/analyze",
+      {
+        method: "POST",
+        headers,
+        body: formData,
+      }
+    );
 
-  const data = await res.json();
+  const data =
+    await res.json();
 
   if (data.error) {
-    throw new Error(data.error);
+    throw new Error(
+      data.error
+    );
   }
 
   return data;
 }
 
+// ---------------------------------------------------------
+// Ask PrivacyLens AI
+// ---------------------------------------------------------
 
 export async function askAboutPolicy({
   apiUrl,
   question,
   analysis,
 }) {
-  const res = await fetchWithFallback({
-    apiUrl,
-    path: "/api/chat",
-    options: {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        question,
-        policy_data: analysis
-          ? {
-              risk: analysis.risk_score,
-              clauses: analysis.clauses,
-              darkPatterns: analysis.dark_patterns,
-              report: analysis.privacy_report,
-            }
-          : null,
-      }),
-    },
-  });
+  const res =
+    await request(
+      "/api/chat",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type":
+            "application/json",
+        },
+        body: JSON.stringify({
+          question,
+          policy_data:
+            analysis
+              ? {
+                  risk:
+                    analysis.risk_score,
 
-  const data = await res.json();
+                  clauses:
+                    analysis.clauses,
 
-  return data.answer || "No answer available.";
+                  darkPatterns:
+                    analysis.dark_patterns,
+
+                  report:
+                    analysis.privacy_report,
+                }
+              : null,
+        }),
+      }
+    );
+
+  const data =
+    await res.json();
+
+  return (
+    data.answer ||
+    "No answer available."
+  );
 }

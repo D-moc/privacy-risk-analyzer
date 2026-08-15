@@ -3,31 +3,25 @@
 // Responsibilities:
 //  1. Receive the signed-in user's Firebase ID token from the PrivacyLens
 //     web app and cache it.
-//  2. Maintain local + production backend configuration.
-//  3. Automatically use the local backend when available and fall back to
-//     the deployed Render backend when local is unavailable.
+//  2. Use the deployed PrivacyLens backend.
+//  3. Automatically scan pages when enabled.
 //  4. Paint the toolbar badge with the risk score of the last scan.
-//  5. Auto-scan pages when enabled.
-//  6. Show an in-page PrivacyLens result overlay.
+//  5. Show an in-page PrivacyLens result overlay.
 
 // ---------------------------------------------------------------------------
 // Backend configuration
 // ---------------------------------------------------------------------------
 
-const LOCAL_API_URL = "http://127.0.0.1:8811";
-
 const PRODUCTION_API_URL =
   "https://privacy-risk-analyzer.onrender.com";
 
 const DEFAULT_SETTINGS = {
-  // Preferred backend for local development.
-  apiUrl: LOCAL_API_URL,
+  // Production backend
+  apiUrl: PRODUCTION_API_URL,
 
-  // Production fallback backend.
-  productionApiUrl: PRODUCTION_API_URL,
-
-  // PrivacyLens web application.
-  webAppUrl: "http://localhost:5173",
+  // Production PrivacyLens web application
+  webAppUrl:
+    "https://privacy-risk-analyzer.vercel.app",
 
   preference: "moderate",
 
@@ -39,33 +33,70 @@ const DEFAULT_SETTINGS = {
 // ---------------------------------------------------------------------------
 
 // Don't repeatedly scan the same domain within five minutes.
-const SCAN_COOLDOWN_MS = 5 * 60 * 1000;
+const SCAN_COOLDOWN_MS =
+  5 * 60 * 1000;
 
 // ---------------------------------------------------------------------------
 // Extension installation
 // ---------------------------------------------------------------------------
 
-chrome.runtime.onInstalled.addListener(async () => {
-  const stored = await chrome.storage.local.get(["settings"]);
+chrome.runtime.onInstalled.addListener(
+  async () => {
+    const stored =
+      await chrome.storage.local.get([
+        "settings",
+      ]);
 
-  if (!stored.settings) {
+    if (!stored.settings) {
+      await chrome.storage.local.set({
+        settings:
+          DEFAULT_SETTINGS,
+      });
+
+      return;
+    }
+
+    // Merge existing settings with the
+    // current production defaults.
+    const updatedSettings = {
+      ...DEFAULT_SETTINGS,
+      ...stored.settings,
+    };
+
+    // Force old localhost backend
+    // configurations to production.
+    if (
+      updatedSettings.apiUrl ===
+        "http://127.0.0.1:8811" ||
+      updatedSettings.apiUrl ===
+        "http://127.0.0.1:8000" ||
+      updatedSettings.apiUrl ===
+        "http://localhost:8811" ||
+      updatedSettings.apiUrl ===
+        "http://localhost:8000"
+    ) {
+      updatedSettings.apiUrl =
+        PRODUCTION_API_URL;
+    }
+
+    // Force old localhost frontend
+    // configurations to production.
+    if (
+      updatedSettings.webAppUrl ===
+        "http://localhost:5173" ||
+      updatedSettings.webAppUrl ===
+        "http://127.0.0.1:5173"
+    ) {
+      updatedSettings.webAppUrl =
+        "https://privacy-risk-analyzer.vercel.app";
+    }
+
     await chrome.storage.local.set({
-      settings: DEFAULT_SETTINGS,
+      settings:
+        updatedSettings,
     });
-
-    return;
   }
-
-  // Upgrade settings from older versions of the extension.
-  const updatedSettings = {
-    ...DEFAULT_SETTINGS,
-    ...stored.settings,
-  };
-
-  await chrome.storage.local.set({
-    settings: updatedSettings,
-  });
-});
+);
 
 // ---------------------------------------------------------------------------
 // Authentication bridge
@@ -73,28 +104,58 @@ chrome.runtime.onInstalled.addListener(async () => {
 // ---------------------------------------------------------------------------
 
 chrome.runtime.onMessageExternal.addListener(
-  (message, sender, sendResponse) => {
-    if (!message || message.source !== "privacylens-web") {
+  (
+    message,
+    sender,
+    sendResponse
+  ) => {
+    if (
+      !message ||
+      message.source !==
+        "privacylens-web"
+    ) {
       return;
     }
 
-    if (message.type === "AUTH_TOKEN") {
+    if (
+      message.type ===
+      "AUTH_TOKEN"
+    ) {
       chrome.storage.local.set({
         auth: {
-          token: message.token || null,
-          email: message.email || null,
-          name: message.name || null,
-          updatedAt: Date.now(),
+          token:
+            message.token ||
+            null,
+
+          email:
+            message.email ||
+            null,
+
+          name:
+            message.name ||
+            null,
+
+          updatedAt:
+            Date.now(),
         },
       });
 
-      sendResponse({ ok: true });
+      sendResponse({
+        ok: true,
+      });
     }
 
-    if (message.type === "AUTH_LOGOUT") {
-      chrome.storage.local.remove("auth");
+    if (
+      message.type ===
+      "AUTH_LOGOUT"
+    ) {
+      chrome.storage.local.remove(
+        "auth"
+      );
 
-      sendResponse({ ok: true });
+      sendResponse({
+        ok: true,
+      });
     }
 
     return true;
@@ -107,12 +168,22 @@ chrome.runtime.onMessageExternal.addListener(
 // ---------------------------------------------------------------------------
 
 chrome.runtime.onMessage.addListener(
-  (message, sender, sendResponse) => {
+  (
+    message,
+    sender,
+    sendResponse
+  ) => {
     if (
-      message?.type === "SET_BADGE" &&
-      typeof message.tabId === "number"
+      message?.type ===
+        "SET_BADGE" &&
+      typeof message.tabId ===
+        "number"
     ) {
-      const { tabId, text, color } = message;
+      const {
+        tabId,
+        text,
+        color,
+      } = message;
 
       chrome.action.setBadgeText({
         tabId,
@@ -120,13 +191,17 @@ chrome.runtime.onMessage.addListener(
       });
 
       if (color) {
-        chrome.action.setBadgeBackgroundColor({
-          tabId,
-          color,
-        });
+        chrome.action.setBadgeBackgroundColor(
+          {
+            tabId,
+            color,
+          }
+        );
       }
 
-      sendResponse({ ok: true });
+      sendResponse({
+        ok: true,
+      });
     }
 
     return true;
@@ -138,12 +213,24 @@ chrome.runtime.onMessage.addListener(
 // ---------------------------------------------------------------------------
 
 chrome.tabs.onUpdated.addListener(
-  async (tabId, changeInfo, tab) => {
-    if (changeInfo.status !== "complete") {
+  async (
+    tabId,
+    changeInfo,
+    tab
+  ) => {
+    if (
+      changeInfo.status !==
+      "complete"
+    ) {
       return;
     }
 
-    if (!tab.url || !/^https?:\/\//i.test(tab.url)) {
+    if (
+      !tab.url ||
+      !/^https?:\/\//i.test(
+        tab.url
+      )
+    ) {
       return;
     }
 
@@ -152,25 +239,42 @@ chrome.tabs.onUpdated.addListener(
       return;
     }
 
-    const { settings } =
-      await chrome.storage.local.get(["settings"]);
+    const {
+      settings,
+    } =
+      await chrome.storage.local.get(
+        ["settings"]
+      );
 
     const effectiveSettings = {
       ...DEFAULT_SETTINGS,
       ...(settings || {}),
     };
 
-    if (effectiveSettings.autoScan === false) {
+    // Always use production backend.
+    effectiveSettings.apiUrl =
+      PRODUCTION_API_URL;
+
+    effectiveSettings.webAppUrl =
+      "https://privacy-risk-analyzer.vercel.app";
+
+    if (
+      effectiveSettings.autoScan ===
+      false
+    ) {
       return;
     }
 
     let domain;
 
     try {
-      domain = new URL(tab.url).hostname.replace(
-        /^www\./,
-        ""
-      );
+      domain =
+        new URL(
+          tab.url
+        ).hostname.replace(
+          /^www\./,
+          ""
+        );
     } catch {
       return;
     }
@@ -179,24 +283,36 @@ chrome.tabs.onUpdated.addListener(
     // Cooldown
     // ---------------------------------------------------------
 
-    const { autoScanCache } =
-      await chrome.storage.local.get(["autoScanCache"]);
+    const {
+      autoScanCache,
+    } =
+      await chrome.storage.local.get(
+        ["autoScanCache"]
+      );
 
-    const cache = autoScanCache || {};
-    const last = cache[domain];
+    const cache =
+      autoScanCache || {};
+
+    const last =
+      cache[domain];
 
     if (
       last &&
-      Date.now() - last < SCAN_COOLDOWN_MS
+      Date.now() - last <
+        SCAN_COOLDOWN_MS
     ) {
       return;
     }
 
-    cache[domain] = Date.now();
+    cache[domain] =
+      Date.now();
 
-    await chrome.storage.local.set({
-      autoScanCache: cache,
-    });
+    await chrome.storage.local.set(
+      {
+        autoScanCache:
+          cache,
+      }
+    );
 
     // ---------------------------------------------------------
     // Run scan
@@ -215,10 +331,16 @@ chrome.tabs.onUpdated.addListener(
       );
 
       try {
-        await chrome.scripting.executeScript({
-          target: { tabId },
-          func: removeOverlay,
-        });
+        await chrome.scripting.executeScript(
+          {
+            target: {
+              tabId,
+            },
+
+            func:
+              removeOverlay,
+          }
+        );
       } catch {
         // Page may have navigated away.
       }
@@ -240,10 +362,16 @@ async function runAutoScan(
   // ---------------------------------------------------------
 
   try {
-    await chrome.scripting.executeScript({
-      target: { tabId },
-      func: injectLoadingOverlay,
-    });
+    await chrome.scripting.executeScript(
+      {
+        target: {
+          tabId,
+        },
+
+        func:
+          injectLoadingOverlay,
+      }
+    );
   } catch {
     return;
   }
@@ -252,20 +380,34 @@ async function runAutoScan(
   // Get current page text
   // ---------------------------------------------------------
 
-  const getCurrentPageText = async () => {
-    const [textResult] =
-      await chrome.scripting.executeScript({
-        target: { tabId },
-        func: () => document.body.innerText,
-      });
+  const getCurrentPageText =
+    async () => {
+      const [
+        textResult,
+      ] =
+        await chrome.scripting.executeScript(
+          {
+            target: {
+              tabId,
+            },
 
-    return (
-      textResult?.result || ""
-    ).slice(0, 20000);
-  };
+            func: () =>
+              document.body
+                .innerText,
+          }
+        );
 
-  let inputPayload = "";
-  let usedLink = false;
+      return (
+        textResult?.result ||
+        ""
+      ).slice(0, 20000);
+    };
+
+  let inputPayload =
+    "";
+
+  let usedLink =
+    false;
 
   // ---------------------------------------------------------
   // Try to find privacy policy link
@@ -274,8 +416,12 @@ async function runAutoScan(
   const linkResult =
     await chrome.scripting
       .executeScript({
-        target: { tabId },
-        func: findPolicyLinkInPage,
+        target: {
+          tabId,
+        },
+
+        func:
+          findPolicyLinkInPage,
       })
       .catch((e) => {
         console.warn(
@@ -287,7 +433,8 @@ async function runAutoScan(
       });
 
   const link =
-    linkResult?.[0]?.result || null;
+    linkResult?.[0]?.result ||
+    null;
 
   console.log(
     "PrivacyLens auto-scan: policy link found on",
@@ -302,7 +449,9 @@ async function runAutoScan(
 
   if (link) {
     inputPayload = (
-      await fetchTextFromUrl(link)
+      await fetchTextFromUrl(
+        link
+      )
     ).slice(0, 20000);
 
     console.log(
@@ -311,7 +460,8 @@ async function runAutoScan(
     );
 
     usedLink =
-      inputPayload.trim().length >= 40;
+      inputPayload.trim()
+        .length >= 40;
   }
 
   // ---------------------------------------------------------
@@ -332,8 +482,14 @@ async function runAutoScan(
   // Minimum content requirement
   // ---------------------------------------------------------
 
-  if (inputPayload.trim().length < 40) {
-    await safeRemoveOverlay(tabId);
+  if (
+    inputPayload.trim()
+      .length < 40
+  ) {
+    await safeRemoveOverlay(
+      tabId
+    );
+
     return;
   }
 
@@ -341,27 +497,34 @@ async function runAutoScan(
   // Get authentication
   // ---------------------------------------------------------
 
-  const { auth } =
-    await chrome.storage.local.get(["auth"]);
+  const {
+    auth,
+  } =
+    await chrome.storage.local.get(
+      ["auth"]
+    );
 
   // ---------------------------------------------------------
-  // Analyze
-  // Local backend is tried first.
-  // Render backend is automatic fallback.
+  // Analyze using production backend
   // ---------------------------------------------------------
 
-  let result = await postAnalyze(
-    settings,
-    domain,
-    inputPayload,
-    auth
-  );
+  let result =
+    await postAnalyze(
+      settings,
+      domain,
+      inputPayload,
+      auth
+    );
 
   // ---------------------------------------------------------
-  // If linked policy was rejected, retry current page
+  // If linked policy was rejected,
+  // retry current page
   // ---------------------------------------------------------
 
-  if (!result.ok && usedLink) {
+  if (
+    !result.ok &&
+    usedLink
+  ) {
     const currentPageText =
       await getCurrentPageText();
 
@@ -371,14 +534,17 @@ async function runAutoScan(
     );
 
     if (
-      currentPageText.trim().length >= 40
+      currentPageText
+        .trim()
+        .length >= 40
     ) {
-      result = await postAnalyze(
-        settings,
-        domain,
-        currentPageText,
-        auth
-      );
+      result =
+        await postAnalyze(
+          settings,
+          domain,
+          currentPageText,
+          auth
+        );
     }
   }
 
@@ -392,7 +558,10 @@ async function runAutoScan(
       result.reason
     );
 
-    await safeRemoveOverlay(tabId);
+    await safeRemoveOverlay(
+      tabId
+    );
+
     return;
   }
 
@@ -400,62 +569,67 @@ async function runAutoScan(
   // Successful result
   // ---------------------------------------------------------
 
-  const data = result.data;
+  const data =
+    result.data;
 
   const color =
-    data.risk_level === "High"
+    data.risk_level ===
+    "High"
       ? "#EF4444"
-      : data.risk_level === "Medium"
+      : data.risk_level ===
+        "Medium"
       ? "#F59E0B"
       : "#22C55E";
 
   // Toolbar badge
-  chrome.action.setBadgeText({
-    tabId,
-    text: String(data.risk_score),
-  });
+  chrome.action.setBadgeText(
+    {
+      tabId,
+      text: String(
+        data.risk_score
+      ),
+    }
+  );
 
-  chrome.action.setBadgeBackgroundColor({
-    tabId,
-    color,
-  });
+  chrome.action.setBadgeBackgroundColor(
+    {
+      tabId,
+      color,
+    }
+  );
 
   // ---------------------------------------------------------
   // Show result overlay
   // ---------------------------------------------------------
 
   try {
-    await chrome.scripting.executeScript({
-      target: { tabId },
-      func: injectOverlay,
-      args: [data, domain],
-    });
+    await chrome.scripting.executeScript(
+      {
+        target: {
+          tabId,
+        },
+
+        func:
+          injectOverlay,
+
+        args: [
+          data,
+          domain,
+        ],
+      }
+    );
   } catch {
     // Page may have navigated away.
   }
 }
 
 // ---------------------------------------------------------------------------
-// Remove overlay safely
+// Production API request
 // ---------------------------------------------------------------------------
-
-async function safeRemoveOverlay(tabId) {
-  try {
-    await chrome.scripting.executeScript({
-      target: { tabId },
-      func: removeOverlay,
-    });
-  } catch {
-    // Page may already be gone.
-  }
-}
-
-// ---------------------------------------------------------------------------
-// API request
 //
 // IMPORTANT:
-// Local backend is attempted first.
-// If unavailable, Render production backend is attempted automatically.
+// The production extension uses Render directly.
+// There is NO localhost fallback here.
 // ---------------------------------------------------------------------------
 
 async function postAnalyze(
@@ -464,6 +638,9 @@ async function postAnalyze(
   inputPayload,
   auth
 ) {
+  const apiUrl =
+    PRODUCTION_API_URL;
+
   const headers = {};
 
   if (auth?.token) {
@@ -471,127 +648,132 @@ async function postAnalyze(
       `Bearer ${auth.token}`;
   }
 
-  const apiUrls = [
-    settings.apiUrl ||
-      LOCAL_API_URL,
+  const controller =
+    new AbortController();
 
-    settings.productionApiUrl ||
-      PRODUCTION_API_URL,
-  ];
-
-  // Remove duplicate URLs.
-  const uniqueApiUrls = [
-    ...new Set(apiUrls),
-  ];
-
-  for (const apiUrl of uniqueApiUrls) {
-    const controller =
-      new AbortController();
-
-    const timer = setTimeout(
-      () => controller.abort(),
+  const timer =
+    setTimeout(
+      () =>
+        controller.abort(),
       30000
     );
 
-    try {
-      console.log(
-        "PrivacyLens: trying backend ->",
-        apiUrl
-      );
+  try {
+    console.log(
+      "PrivacyLens: trying production backend ->",
+      apiUrl
+    );
 
-      // Create a fresh FormData object for
-      // every backend attempt.
-      const formData = new FormData();
+    const formData =
+      new FormData();
 
-      formData.append(
-        "policy_name",
-        domain
-      );
+    formData.append(
+      "policy_name",
+      domain ||
+        "Untitled Policy"
+    );
 
-      formData.append(
-        "input",
-        inputPayload
-      );
+    formData.append(
+      "input",
+      inputPayload
+    );
 
-      formData.append(
-        "preference",
-        settings.preference ||
-          "moderate"
-      );
+    formData.append(
+      "preference",
+      settings.preference ||
+        "moderate"
+    );
 
-      const res = await fetch(
+    const res =
+      await fetch(
         `${apiUrl}/api/analyze`,
         {
           method: "POST",
           headers,
           body: formData,
-          signal: controller.signal,
+          signal:
+            controller.signal,
         }
       );
 
-      // Try next backend if HTTP error.
-      if (!res.ok) {
-        console.warn(
-          `PrivacyLens: ${apiUrl} returned HTTP ${res.status}`
-        );
-
-        continue;
-      }
-
-      const data =
-        await res.json();
-
-      // Backend returned an application error.
-      if (data.error) {
-        console.warn(
-          "PrivacyLens backend error:",
-          data.error
-        );
-
-        continue;
-      }
-
-      console.log(
-        "PrivacyLens: analysis successful ->",
-        apiUrl
+    if (!res.ok) {
+      console.error(
+        `PrivacyLens backend returned HTTP ${res.status}`
       );
-
-      // Remember which backend worked.
-      await chrome.storage.local.set({
-        activeApiUrl: apiUrl,
-      });
 
       return {
-        ok: true,
-        data,
+        ok: false,
+        reason:
+          "SERVER_ERROR",
       };
-    } catch (error) {
-      console.warn(
-        "PrivacyLens: backend unavailable ->",
-        apiUrl
-      );
-    } finally {
-      clearTimeout(timer);
     }
-  }
 
-  return {
-    ok: false,
-    reason: "NETWORK_ERROR",
-  };
+    const data =
+      await res.json();
+
+    if (data.error) {
+      console.error(
+        "PrivacyLens backend error:",
+        data.error
+      );
+
+      return {
+        ok: false,
+        reason:
+          data.error,
+      };
+    }
+
+    console.log(
+      "PrivacyLens: analysis successful ->",
+      apiUrl
+    );
+
+    // Remember the production backend.
+    await chrome.storage.local.set(
+      {
+        activeApiUrl:
+          apiUrl,
+      }
+    );
+
+    return {
+      ok: true,
+      data,
+    };
+  } catch (error) {
+    console.error(
+      "PrivacyLens: production backend unavailable ->",
+      error?.message
+    );
+
+    return {
+      ok: false,
+      reason:
+        error?.message ||
+        "NETWORK_ERROR",
+    };
+  } finally {
+    clearTimeout(
+      timer
+    );
+  }
 }
 
 // ---------------------------------------------------------------------------
 // Linked policy page timeout
 // ---------------------------------------------------------------------------
 
-const LINKED_TAB_LOAD_TIMEOUT_MS = 8000;
+const LINKED_TAB_LOAD_TIMEOUT_MS =
+  8000;
 
 // ---------------------------------------------------------------------------
 // Fetch text from linked policy URL
 // ---------------------------------------------------------------------------
 
-async function fetchTextFromUrl(url) {
+async function fetchTextFromUrl(
+  url
+) {
   if (!url) {
     return "";
   }
@@ -600,38 +782,49 @@ async function fetchTextFromUrl(url) {
 
   try {
     // Open background tab.
-    tab = await chrome.tabs.create({
-      url,
-      active: false,
-    });
+    tab =
+      await chrome.tabs.create(
+        {
+          url,
+          active: false,
+        }
+      );
 
     // Wait for page load.
     await new Promise(
-      (resolve, reject) => {
+      (
+        resolve,
+        reject
+      ) => {
         const timer =
-          setTimeout(() => {
-            chrome.tabs.onUpdated.removeListener(
-              listener
-            );
+          setTimeout(
+            () => {
+              chrome.tabs.onUpdated.removeListener(
+                listener
+              );
 
-            reject(
-              new Error(
-                "LINKED_PAGE_TIMEOUT"
-              )
-            );
-          },
-          LINKED_TAB_LOAD_TIMEOUT_MS
-        );
+              reject(
+                new Error(
+                  "LINKED_PAGE_TIMEOUT"
+                )
+              );
+            },
+            LINKED_TAB_LOAD_TIMEOUT_MS
+          );
 
         function listener(
           updatedTabId,
           info
         ) {
           if (
-            updatedTabId === tab.id &&
-            info.status === "complete"
+            updatedTabId ===
+              tab.id &&
+            info.status ===
+              "complete"
           ) {
-            clearTimeout(timer);
+            clearTimeout(
+              timer
+            );
 
             chrome.tabs.onUpdated.removeListener(
               listener
@@ -648,16 +841,26 @@ async function fetchTextFromUrl(url) {
     );
 
     // Extract text.
-    const [result] =
-      await chrome.scripting.executeScript({
-        target: {
-          tabId: tab.id,
-        },
-        func: () =>
-          document.body.innerText,
-      });
+    const [
+      result,
+    ] =
+      await chrome.scripting.executeScript(
+        {
+          target: {
+            tabId:
+              tab.id,
+          },
 
-    return result?.result || "";
+          func: () =>
+            document.body
+              .innerText,
+        }
+      );
+
+    return (
+      result?.result ||
+      ""
+    );
   } catch {
     return "";
   } finally {
@@ -711,8 +914,11 @@ function findPolicyLinkInPage() {
   const currentHost =
     window.location.hostname;
 
-  const sameDomain = {};
-  const crossDomain = {};
+  const sameDomain =
+    {};
+
+  const crossDomain =
+    {};
 
   const anchors =
     Array.from(
@@ -723,7 +929,10 @@ function findPolicyLinkInPage() {
 
   for (const a of anchors) {
     const text =
-      (a.textContent || "").trim();
+      (
+        a.textContent ||
+        ""
+      ).trim();
 
     const href =
       a.href || "";
@@ -745,7 +954,8 @@ function findPolicyLinkInPage() {
     }
 
     const bucket =
-      host === currentHost
+      host ===
+      currentHost
         ? sameDomain
         : crossDomain;
 
@@ -762,7 +972,9 @@ function findPolicyLinkInPage() {
       }
 
       const isCanonical =
-        canonical.test(text);
+        canonical.test(
+          text
+        );
 
       const existing =
         bucket[key];
@@ -859,6 +1071,7 @@ function injectLoadingOverlay() {
 
       return {
         host,
+
         shadow:
           host.shadowRoot ||
           host.attachShadow({
@@ -867,7 +1080,9 @@ function injectLoadingOverlay() {
       };
     };
 
-  const { shadow } =
+  const {
+    shadow,
+  } =
     getOverlayShadowRoot();
 
   shadow.innerHTML = `
@@ -1000,6 +1215,7 @@ function injectOverlay(
 
       return {
         host,
+
         shadow:
           host.shadowRoot ||
           host.attachShadow({
@@ -1278,6 +1494,7 @@ function injectOverlay(
     <div class="card">
 
       <div class="head">
+
         <span class="title">
           🔍 PrivacyLens
         </span>
@@ -1285,6 +1502,7 @@ function injectOverlay(
         <button class="close">
           ✕
         </button>
+
       </div>
 
       <div class="sub">
@@ -1293,6 +1511,7 @@ function injectOverlay(
       </div>
 
       <div class="score-row">
+
         <span class="score">
           ${score}
         </span>
@@ -1300,6 +1519,7 @@ function injectOverlay(
         <span class="level">
           ${level}
         </span>
+
       </div>
 
       ${topFindings
@@ -1324,7 +1544,8 @@ function injectOverlay(
     )
     .addEventListener(
       "click",
-      () => host.remove()
+      () =>
+        host.remove()
     );
 
   // ---------------------------------------------------------
